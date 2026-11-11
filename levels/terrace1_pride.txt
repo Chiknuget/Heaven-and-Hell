@@ -1,0 +1,10 @@
+name: The First Terrace
+subtitle: Pride
+sky_top: 150 146 160
+sky_bottom: 80 76 90
+map:
+  ppppp
+ ppPpPpp
+pvpppppp^
+ ppPpPpp
+  ppppp

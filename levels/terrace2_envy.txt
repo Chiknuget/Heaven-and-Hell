@@ -1,0 +1,10 @@
+name: The Second Terrace
+subtitle: Envy
+sky_top: 165 160 175
+sky_bottom: 95 90 105
+map:
+  aaaaa
+ apppppa
+pvpppppp^
+ apppppa
+  aaaaa

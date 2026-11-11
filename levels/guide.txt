@@ -1,0 +1,7 @@
+// Spoken by the guide the first time the player dies, and never again.
+name: The Guide
+Peace, traveler. Do not be afraid.
+You have died, but your journey is not over. This is Purgatory, the mountain where souls are made clean.
+Seven terraces rise above us, one for each of the seven deadly sins. Climb them, and at the summit your burden will be lifted and the way back will open.
+If you cannot wait, the toll gate will return you at once. But nothing here is free. Those who take it carry a burden, and the burdened cannot enter Heaven.
+Choose as you will. We will not meet again.

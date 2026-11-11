@@ -1,0 +1,13 @@
+name: The Second Circle
+subtitle: Lust
+sky_top: 90 40 110
+sky_bottom: 25 8 35
+map:
+OOOOOOOO
+O^kkkkkk
+Okkkkkkk
+OkkOkkkk
+Okkkkkkk
+OkkkkOkk
+Okkkkkkk
+Okkkkkkv

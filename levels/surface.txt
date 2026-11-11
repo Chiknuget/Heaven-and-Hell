@@ -1,0 +1,15 @@
+name: The Surface
+sky_top: 120 180 240
+sky_bottom: 200 230 250
+spawn: 4 4
+map:
+T,,,,,,,T,
+,,,d,,,,,,
+,,,d,^,,T,
+,T,d,,,,,,
+,,,dddd,,,
+,,,,,,d,,,
+ww,,,,d,,T
+www,,,dv,,
+,ww,T,,,,,
+,,,,,,,,,,

@@ -1,0 +1,13 @@
+name: The Third Circle
+subtitle: Gluttony
+sky_top: 70 64 50
+sky_bottom: 20 18 12
+map:
+OOOOOOOO
+O^mmmmmm
+Ommmxxmm
+Ommxxxmm
+Ommmxmmm
+Ommmmmmm
+Oxmmmmmm
+Oxxmmmmv

@@ -1,0 +1,13 @@
+name: The Fifth Circle
+subtitle: Wrath
+sky_top: 40 60 40
+sky_bottom: 10 18 10
+map:
+OOOOOOOO
+O^mxxxxx
+Oxmmxxxx
+Oxxmmmxx
+Oxxxxmxx
+Oxxxxmmx
+Oxxxxxmm
+Oxxxxxxv

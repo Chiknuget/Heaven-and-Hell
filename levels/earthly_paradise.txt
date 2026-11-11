@@ -1,0 +1,12 @@
+name: The Earthly Paradise
+subtitle: Your burden is lifted
+sky_top: 255 252 235
+sky_bottom: 200 230 200
+map:
+  ,,,,,,
+ ,T,,,,T,
+,,,,ww,,,,
+,v,,ww,,G,
+,,,,,,,,,,
+ ,T,,,,T,
+  ,,,,,,

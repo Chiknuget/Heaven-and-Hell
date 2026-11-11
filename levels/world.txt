@@ -1,0 +1,25 @@
+// Stacked floors, top to bottom. Stairs connect neighbors.
+heaven.txt
+surface.txt
+caves.txt
+deep_caves.txt
+circle1_limbo.txt
+circle2_lust.txt
+circle3_gluttony.txt
+circle4_greed.txt
+circle5_wrath.txt
+circle6_heresy.txt
+circle7_violence.txt
+circle8_fraud.txt
+circle9_treachery.txt
+
+// Purgatory, top to bottom. The last one is where you arrive when you die.
+purgatory: earthly_paradise.txt
+purgatory: terrace7_lust.txt
+purgatory: terrace6_gluttony.txt
+purgatory: terrace5_greed.txt
+purgatory: terrace4_sloth.txt
+purgatory: terrace3_wrath.txt
+purgatory: terrace2_envy.txt
+purgatory: terrace1_pride.txt
+purgatory: ante_purgatory.txt

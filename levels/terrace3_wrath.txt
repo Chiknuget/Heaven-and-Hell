@@ -1,0 +1,10 @@
+name: The Third Terrace
+subtitle: Wrath
+sky_top: 140 130 130
+sky_bottom: 70 62 62
+map:
+  fffff
+ fpfpfpf
+pvpppppp^
+ fpfpfpf
+  fffff

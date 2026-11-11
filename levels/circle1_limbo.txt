@@ -1,0 +1,13 @@
+name: The First Circle
+subtitle: Limbo
+sky_top: 120 118 128
+sky_bottom: 40 38 46
+map:
+OOOOOOOO
+O^aaaaaa
+OaaPaaPa
+Oaaaaaaa
+OaPaaPaa
+Oaaaaaaa
+OaaaaaPa
+Oaaaaaav

@@ -1,0 +1,13 @@
+name: The Seventh Circle
+subtitle: Violence
+sky_top: 120 10 15
+sky_bottom: 35 0 4
+map:
+OOOOOOOO
+O^rrrrrr
+Orrrrrrr
+Obbbrbbb
+Obbbrbbb
+Orrrrrrr
+Orrrrrrr
+Orrrrrrv

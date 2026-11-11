@@ -1,0 +1,13 @@
+name: The Sixth Circle
+subtitle: Heresy
+sky_top: 140 40 10
+sky_bottom: 40 8 2
+map:
+OOOOOOOO
+O^rrrrrr
+OrBrBrBr
+Orrrrrrr
+OrBrBrBr
+Orrrrrrr
+OrBrB~~r
+Orrrr~rv

@@ -1,0 +1,13 @@
+name: The Ninth Circle
+subtitle: Treachery
+sky_top: 60 90 120
+sky_bottom: 10 16 30
+map:
+OOOOOOOO
+O^iiiiii
+Oiiiiiii
+Oii*ii*i
+Oiiiiiii
+Oi*iiii*
+Oiiiiiii
+Oiiiiiii

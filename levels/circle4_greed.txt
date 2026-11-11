@@ -1,0 +1,13 @@
+name: The Fourth Circle
+subtitle: Greed
+sky_top: 120 80 20
+sky_bottom: 35 18 4
+map:
+OOOOOOOO
+O^rrrrrr
+OrrCrrCr
+Orrrrrrr
+OrCrrrCr
+Orrrrrrr
+OrrCrrrr
+Orrrrrrv

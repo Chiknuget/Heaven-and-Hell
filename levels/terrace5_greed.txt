@@ -1,0 +1,10 @@
+name: The Fifth Terrace
+subtitle: Greed
+sky_top: 190 175 140
+sky_bottom: 110 98 70
+map:
+  ppppp
+ pCpppCp
+pvpppppp^
+ ppCpCpp
+  ppppp

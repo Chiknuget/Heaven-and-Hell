@@ -1,0 +1,13 @@
+name: The Eighth Circle
+subtitle: Fraud (Malebolge)
+sky_top: 60 30 40
+sky_bottom: 15 6 10
+map:
+OOOOOOOO
+O^ffffff
+Off~~~ff
+Offf~fff
+O~fffff~
+Off~~~ff
+Offffff~
+Offffffv
