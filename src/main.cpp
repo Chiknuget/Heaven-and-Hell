@@ -3,6 +3,7 @@
 #include "gfx/font.h"
 #include "gfx/framebuffer.h"
 #include "gfx/iso.h"
+#include "gfx/sprite.h"
 #include "gfx/window.h"
 
 #include <algorithm>
@@ -32,10 +33,23 @@ constexpr int BANNER_FADE = 30;		 // banner fade in/out time, inside BANNER_FRAM
 constexpr int DIALOGUE_CHARS = 48; // characters per line in the dialogue box
 constexpr int DIALOGUE_LINES = 3;	 // lines per page
 
+constexpr int WALK_FRAME_TICKS = 8; // frames each walking pose is shown for
+
+enum class Facing
+{
+	Down,
+	Up,
+	Left,
+	Right
+};
+
 struct Player
 {
 	int floor;	// index into world.levels
 	float x, y; // position on that floor, in tiles
+	Facing facing = Facing::Down;
+	bool walking = false;
+	int animTick = 0; // counts up while walking
 };
 
 // A place the player can be sent to
@@ -87,23 +101,22 @@ struct DialogueState
 	int tick = 0;	 // frame counter, for the blinking arrow
 };
 
-enum class ActorKind
-{
-	Player,
-	Guide
-};
-
 // Anything standing in the world that needs depth sorting
 struct Actor
 {
-	ActorKind kind;
+	const pix::Sprite *sprite;
 	float x, y;
+	Facing facing;
+	bool walking;
+	int animTick;
 };
 
 struct Game
 {
 	game::World world;
 	game::Dialogue guideScript;
+	pix::Sprite travelerSprite;
+	pix::Sprite guideSprite;
 	Player player{0, 0.0f, 0.0f};
 	Destination checkpoint; // where Purgatory's gates send you back to
 	Transition transition;
@@ -147,25 +160,67 @@ int drawShadowedText(pix::Framebuffer &fb, int x, int y, const std::string &text
 	return pix::drawText(fb, x, y, text, color, scale);
 }
 
-// (fx, fy) is where the actor's feet touch the ground
-void drawActor(pix::Framebuffer &fb, ActorKind kind, int fx, int fy)
+const char *facingName(Facing f)
 {
-	fb.fillRect(fx - 4, fy - 1, 8, 2, pix::rgb(40, 30, 40)); // shadow
-
-	switch (kind)
+	switch (f)
 	{
-	case ActorKind::Player:
-		fb.fillRect(fx - 3, fy - 10, 6, 10, pix::rgb(60, 120, 200)); // robe
-		fb.fillRect(fx - 2, fy - 14, 4, 4, pix::rgb(240, 200, 170)); // head
-		break;
-
-	case ActorKind::Guide:
-		fb.fillRect(fx - 3, fy - 12, 6, 12, pix::rgb(236, 234, 244)); // white robe
-		fb.fillRect(fx - 3, fy - 7, 6, 1, pix::rgb(220, 180, 90));		// gold sash
-		fb.fillRect(fx - 2, fy - 16, 4, 4, pix::rgb(240, 210, 180));	// head
-		fb.fillRect(fx - 3, fy - 19, 6, 1, pix::rgb(255, 220, 100));	// halo
-		break;
+	case Facing::Up:
+		return "up";
+	case Facing::Left:
+		return "left";
+	case Facing::Right:
+		return "right";
+	default:
+		return "down";
 	}
+}
+
+// Chooses which frame of a sprite to show. Sets flip when a missing
+// left or right animation is made by mirroring the other one.
+const pix::Image *pickFrame(const pix::Sprite &s, Facing facing, bool walking, int tick, bool &flip)
+{
+	flip = false;
+	const std::vector<pix::Image> *frames = s.anim(facingName(facing));
+
+	if (!frames && facing == Facing::Left)
+	{
+		frames = s.anim("right");
+		flip = true;
+	}
+	if (!frames && facing == Facing::Right)
+	{
+		frames = s.anim("left");
+		flip = true;
+	}
+	if (!frames)
+	{
+		frames = s.anim("down");
+		flip = false;
+	}
+	if (!frames || frames->empty())
+		return nullptr;
+
+	// Frame 0 is standing; the rest loop while walking
+	int n = static_cast<int>(frames->size());
+	int index = 0;
+	if (walking && n > 1)
+		index = 1 + (tick / WALK_FRAME_TICKS) % (n - 1);
+
+	return &(*frames)[index];
+}
+
+// (fx, fy) is where the actor's feet touch the ground
+void drawActor(pix::Framebuffer &fb, const Actor &a, int fx, int fy)
+{
+	fb.fillRect(fx - 4, fy - 1, 8, 2, pix::rgba(0, 0, 0, 90)); // soft shadow
+
+	if (!a.sprite)
+		return;
+
+	bool flip = false;
+	const pix::Image *frame = pickFrame(*a.sprite, a.facing, a.walking, a.animTick, flip);
+	if (frame)
+		pix::drawSprite(fb, *a.sprite, *frame, fx, fy, flip);
 }
 
 // ===================================================================
@@ -500,7 +555,9 @@ void drawDialogue(pix::Framebuffer &fb, const DialogueState &d)
 void arrive(Game &g, const Destination &d)
 {
 	const game::World &w = g.world;
-	g.player = Player{d.floor, d.x, d.y};
+	g.player.floor = d.floor; // facing is kept, so you arrive looking the same way
+	g.player.x = d.x;
+	g.player.y = d.y;
 
 	const game::Level &level = w.levels[d.floor];
 	showBanner(g.banner, level.name, level.subtitle);
@@ -525,8 +582,11 @@ void arrive(Game &g, const Destination &d)
 void startNewGame(Game &g)
 {
 	g = Game{};
-	g.world = game::loadWorld("levels/world.txt"); // reloaded so map edits show up
+	// Everything is reloaded, so edits to levels, dialogue and sprites show up
+	g.world = game::loadWorld("levels/world.txt");
 	g.guideScript = game::loadDialogue("levels/guide.txt", DIALOGUE_CHARS, DIALOGUE_LINES);
+	g.travelerSprite = pix::loadSprite("sprites/traveler.txt");
+	g.guideSprite = pix::loadSprite("sprites/guide.txt");
 	arrive(g, spawnOf(g.world, game::HEAVEN));
 	g.inProgress = true;
 }
@@ -535,6 +595,9 @@ void updateGame(const pix::Window &window, Game &g)
 {
 	using pix::Key;
 	Transition &t = g.transition;
+	Player &pl = g.player;
+
+	pl.walking = false; // set again below if the player actually moves
 
 	if (g.banner.frame < BANNER_FRAMES)
 		++g.banner.frame;
@@ -563,10 +626,30 @@ void updateGame(const pix::Window &window, Game &g)
 		return;
 	}
 
-	const game::Level &level = g.world.levels[g.player.floor];
+	const game::Level &level = g.world.levels[pl.floor];
 
 	int ix = (window.isKeyDown(Key::D) || window.isKeyDown(Key::Right)) - (window.isKeyDown(Key::A) || window.isKeyDown(Key::Left));
 	int iy = (window.isKeyDown(Key::S) || window.isKeyDown(Key::Down)) - (window.isKeyDown(Key::W) || window.isKeyDown(Key::Up));
+
+	// Facing and walk animation. Diagonals use the side view.
+	if (ix != 0 || iy != 0)
+	{
+		pl.walking = true;
+		++pl.animTick;
+
+		if (ix > 0)
+			pl.facing = Facing::Right;
+		else if (ix < 0)
+			pl.facing = Facing::Left;
+		else if (iy < 0)
+			pl.facing = Facing::Up;
+		else
+			pl.facing = Facing::Down;
+	}
+	else
+	{
+		pl.animTick = 0;
+	}
 
 	// Velocity in screen pixels per frame
 	float vx = ix * SPEED_X;
@@ -578,7 +661,7 @@ void updateGame(const pix::Window &window, Game &g)
 
 	if (dx != 0.0f || dy != 0.0f)
 	{
-		moveWithCollision(level, g.player.x, g.player.y, dx, dy);
+		moveWithCollision(level, pl.x, pl.y, dx, dy);
 	}
 
 	// Nothing else happens until the current transition has finished
@@ -586,7 +669,7 @@ void updateGame(const pix::Window &window, Game &g)
 		return;
 
 	// Death: the middle of the player is over something deadly
-	char under = level.at(static_cast<int>(std::floor(g.player.x)), static_cast<int>(std::floor(g.player.y)));
+	char under = level.at(static_cast<int>(std::floor(pl.x)), static_cast<int>(std::floor(pl.y)));
 	if (game::tileType(under).deadly)
 	{
 		Destination dest = (g.world.purgatoryBottom >= 0) ? spawnOf(g.world, g.world.purgatoryBottom) : g.checkpoint;
@@ -651,7 +734,7 @@ void drawLevel(pix::Framebuffer &fb, const game::Level &level, const Player &p, 
 		float ay = (a.x + a.y) * pix::TILE_H / 2;
 		int feetX = static_cast<int>(std::floor(ax + 0.5f)) + offX + pix::TILE_W / 2;
 		int feetY = static_cast<int>(std::floor(ay + 0.25f)) + offY - groundH;
-		drawActor(fb, a.kind, feetX, feetY);
+		drawActor(fb, a, feetX, feetY);
 
 		float depth = a.x + a.y;
 		for (int s = 0; s <= W + H - 2; ++s)
@@ -682,15 +765,16 @@ void drawGame(pix::Framebuffer &fb, const Game &g)
 {
 	const game::World &w = g.world;
 	const game::Level &level = w.levels[g.player.floor];
+	const Player &p = g.player;
 
 	std::vector<Actor> actors;
-	actors.push_back({ActorKind::Player, g.player.x, g.player.y});
-	if (g.guidePresent && g.player.floor == w.purgatoryBottom && level.guideX >= 0)
+	actors.push_back({&g.travelerSprite, p.x, p.y, p.facing, p.walking, p.animTick});
+	if (g.guidePresent && p.floor == w.purgatoryBottom && level.guideX >= 0)
 	{
-		actors.push_back({ActorKind::Guide, level.guideX + 0.5f, level.guideY + 0.5f});
+		actors.push_back({&g.guideSprite, level.guideX + 0.5f, level.guideY + 0.5f, Facing::Down, false, 0});
 	}
 
-	drawLevel(fb, level, g.player, actors);
+	drawLevel(fb, level, p, actors);
 
 	bool calm = (g.transition.phase == FadePhase::None);
 

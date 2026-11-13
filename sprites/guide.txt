@@ -1,0 +1,30 @@
+// The guide who meets you on your first death
+size: 8 16
+origin: 4 15
+
+palette:
+y 255 220 100 200
+h 220 220 230
+s 240 210 180
+o 60 50 70
+w 236 234 244
+W 196 192 212
+g 220 180 90
+
+anim: down
+..yyyy..
+........
+..hhhh..
+.hssssh.
+.hossoh.
+..ssss..
+..wwww..
+.wwwwww.
+swwwwwws
+.gggggg.
+.wwwwww.
+.wwwwww.
+.wWwwWw.
+.wwwwww.
+.wwwwww.
+..W..W..
