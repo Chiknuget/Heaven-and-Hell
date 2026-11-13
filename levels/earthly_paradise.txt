@@ -2,6 +2,14 @@ name: The Earthly Paradise
 subtitle: Your burden is lifted
 sky_top: 255 252 235
 sky_bottom: 200 230 200
+enter_scene: paradise
+npc: 3 0 soul_pride sprite=soul if=freed_pride
+npc: 6 0 soul_envy sprite=soul if=freed_envy
+npc: 4 1 soul_wrath sprite=soul if=freed_wrath
+npc: 5 1 soul_sloth sprite=soul if=freed_sloth
+npc: 4 5 soul_greed sprite=soul if=freed_greed
+npc: 5 5 soul_gluttony sprite=soul if=freed_gluttony
+npc: 4 6 soul_lust sprite=soul if=freed_lust
 map:
   ,,,,,,
  ,T,,,,T,

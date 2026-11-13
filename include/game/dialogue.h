@@ -8,8 +8,8 @@ namespace game
 	// One block of speech, used when its condition is true
 	struct DialogueSection
 	{
-		std::string condition; // "first", "again", "burdened", "unburdened", "default" or ""
-		std::vector<std::string> pages;
+		std::string condition;					// "first", "again", "burdened", "unburdened", "default" or ""
+		std::vector<std::string> lines; // one entry per speech, not yet split into pages
 	};
 
 	struct Dialogue
@@ -24,9 +24,11 @@ namespace game
 	// Splits text into lines of at most maxChars characters, breaking between words
 	std::vector<std::string> wrapText(const std::string &text, int maxChars);
 
-	// Loads a dialogue file. Each line of text is one speech; speeches too long
-	// for the box are split into several pages automatically. Throws
-	// std::runtime_error with the file name and line number on mistakes.
-	Dialogue loadDialogue(const std::string &path, int charsPerLine, int linesPerPage);
+	// Splits one speech into pages of at most linesPerPage wrapped lines
+	std::vector<std::string> paginate(const std::string &text, int charsPerLine, int linesPerPage);
+
+	// Loads a dialogue file. Throws std::runtime_error with the file name and
+	// line number on mistakes.
+	Dialogue loadDialogue(const std::string &path);
 
 } // namespace game

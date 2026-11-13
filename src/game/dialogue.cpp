@@ -89,7 +89,27 @@ namespace game
     return lines;
   }
 
-  Dialogue loadDialogue(const std::string &path, int charsPerLine, int linesPerPage)
+  std::vector<std::string> paginate(const std::string &text, int charsPerLine, int linesPerPage)
+  {
+    std::vector<std::string> pages;
+    std::vector<std::string> lines = wrapText(text, charsPerLine);
+
+    for (size_t i = 0; i < lines.size(); i += linesPerPage)
+    {
+      std::string page;
+      size_t end = std::min(lines.size(), i + linesPerPage);
+      for (size_t j = i; j < end; ++j)
+      {
+        if (!page.empty())
+          page += ' ';
+        page += lines[j];
+      }
+      pages.push_back(page);
+    }
+    return pages;
+  }
+
+  Dialogue loadDialogue(const std::string &path)
   {
     std::ifstream in(path);
     if (!in)
@@ -127,21 +147,7 @@ namespace game
       // Lines before any section header always apply
       if (d.sections.empty())
         d.sections.push_back({"", {}});
-
-      // Group the wrapped lines into pages that fit the box
-      std::vector<std::string> lines = wrapText(line, charsPerLine);
-      for (size_t i = 0; i < lines.size(); i += linesPerPage)
-      {
-        std::string page;
-        size_t end = std::min(lines.size(), i + linesPerPage);
-        for (size_t j = i; j < end; ++j)
-        {
-          if (!page.empty())
-            page += ' ';
-          page += lines[j];
-        }
-        d.sections.back().pages.push_back(page);
-      }
+      d.sections.back().lines.push_back(line);
     }
 
     return d;

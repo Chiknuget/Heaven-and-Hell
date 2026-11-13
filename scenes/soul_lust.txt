@@ -1,0 +1,34 @@
+// The Seventh Terrace: a soul standing in the purifying fire, afraid to walk through.
+
+if freed_lust goto thanks
+if met_lust goto again
+set met_lust 1
+say The One in the Fire: Don't come closer. The fire is all that's left of me now.
+say The One in the Fire: I chased every heart that smiled at me, and never stayed with any of them. Now I'm afraid to walk through.
+
+label again
+say The One in the Fire: What if the fire burns away everything I am?
+choice Then stay where you are. = stay | Forget all of them. = forget | It only burns what isn't worth keeping. = right
+
+label stay
+say The One in the Fire: Yes. Stay. It's easier to stay.
+end
+
+label forget
+say The One in the Fire: I can't! They're all I ever was!
+end
+
+label right
+say The One in the Fire: ...What's worth keeping.
+say The One in the Fire: Is there anything of me like that?
+say The One in the Fire: There's only one way to find out.
+set freed_lust 1
+add freed 1
+if freed < 7 goto done
+objective climb All seven souls are free. Climb to the summit.
+label done
+end
+
+label thanks
+say The One in the Fire: The fire didn't hurt. It only took what I didn't need.
+end

@@ -1,0 +1,34 @@
+// The Third Terrace: a man who won't stop shouting at people who aren't there.
+
+if freed_wrath goto thanks
+if met_wrath goto again
+set met_wrath 1
+say The Shouting Man: GET BACK! Every one of them who ever wronged me is still out there, and I will NOT forget a single one!
+
+label again
+say The Shouting Man: I remember every word they said. Every face. I hold on to all of it!
+choice Who wronged you? = who | Are they here? Or is it only you? = right | Then shout louder. = louder
+
+label who
+say The Shouting Man: Who DIDN'T? My brother, my landlord, the man at the market, the...
+say The Shouting Man: No, I have to start again. I can't forget any of them!
+end
+
+label louder
+say The Shouting Man: Don't mock me! You're just like them!
+end
+
+label right
+say The Shouting Man: ...Only me.
+say The Shouting Man: I've been shouting at people who aren't here. For how long?
+say The Shouting Man: I'm tired. I'm so tired of being angry. Let me put it down.
+set freed_wrath 1
+add freed 1
+if freed < 7 goto done
+objective climb All seven souls are free. Climb to the summit.
+label done
+end
+
+label thanks
+say The Shouting Man: It's strange to hear my own voice so quiet. I'd forgotten what it sounded like.
+end

@@ -1,0 +1,23 @@
+// Runs every time the summit is reached. Once all seven souls are free,
+// the first mission ends here and the second begins.
+
+if climb_done goto done
+if freed < 7 goto done
+
+wait 30
+say {name}: They're all here. Every one of them.
+say The Sculptor: We waited for you, {name}. We wanted you to see us like this.
+
+glow 260 120
+say The Voice: Well done, {name}. Seven souls who could not move are climbing again.
+say The Voice: But the thing that took your life still walks the world above. A village on the Surface has learned to fear the dark because of it.
+say The Voice: Go back. Find that village.
+glow 0 90
+
+complete climb
+set climb_done 1
+mission village The Village
+objective village Somewhere on the Surface, a village cries out. Find it.
+
+label done
+end

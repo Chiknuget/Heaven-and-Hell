@@ -1,0 +1,34 @@
+// The Fourth Terrace: a soul who always meant to start tomorrow.
+
+if freed_sloth goto thanks
+if met_sloth goto again
+set met_sloth 1
+say The Sleeper: Mm? Oh. Go on ahead. I'll start climbing tomorrow.
+say The Sleeper: I always meant to do things. Tomorrow always seemed like such a good day for them.
+
+label again
+say The Sleeper: Tomorrow. I'll go tomorrow. I promise.
+choice Tomorrow, then. = tomorrow | You're just lazy. = lazy | There is no tomorrow here. = right
+
+label tomorrow
+say The Sleeper: Good. Tomorrow. Wake me when it's... zzz...
+end
+
+label lazy
+say The Sleeper: Maybe. Wake me when you're done judging.
+end
+
+label right
+say The Sleeper: ...No tomorrow?
+say The Sleeper: Then I suppose it has to be now.
+say The Sleeper: Give me a moment. No. No more moments. I'm going.
+set freed_sloth 1
+add freed 1
+if freed < 7 goto done
+objective climb All seven souls are free. Climb to the summit.
+label done
+end
+
+label thanks
+say The Sleeper: I climbed every step myself. I didn't know I could.
+end

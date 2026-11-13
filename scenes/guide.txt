@@ -1,0 +1,22 @@
+// The guide, met only on the traveler's first death. Starts the first mission.
+
+if met_guide goto again
+set met_guide 1
+
+say The Guide: Peace, {name}. Do not be afraid.
+say The Guide: You have died, but your journey is not over. This is Purgatory, the mountain where souls are made clean.
+say {name}: Something killed me. In the dark. I never even saw it.
+say The Guide: Whatever it was, it cannot follow you here. And you did not come here by chance. The Voice that sent you has work for you on this mountain.
+say The Guide: Seven terraces rise above us, one for each of the seven deadly sins. On each, a soul has stopped climbing. They cling to what they were, and it holds them in place.
+say The Guide: Help them let go. Each one you free will climb to the summit, and you will find them there.
+
+mission climb The Climb
+objective climb Free the souls on the seven terraces. Freed: {freed}/7
+
+say The Guide: If you cannot wait, the toll gate will return you to the world at once. But nothing here is free. Those who take it carry a burden, and the burdened cannot enter Heaven.
+say The Guide: Choose as you will. We will not meet again.
+end
+
+label again
+say The Guide: Go, {name}. The mountain is waiting.
+end

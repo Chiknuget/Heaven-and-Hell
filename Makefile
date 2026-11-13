@@ -2,7 +2,7 @@ CXX      := g++
 CXXFLAGS := -std=c++20 -Wall -Wextra -O2 -g -MMD -MP -Iinclude
 LDLIBS   := -lX11
 
-SRC := $(wildcard src/*.cpp src/gfx/*.cpp src/game/*.cpp)
+SRC := $(wildcard src/*.cpp src/gfx/*.cpp src/game/*.cpp src/play/*.cpp)
 OBJ := $(SRC:src/%.cpp=build/%.o)
 BIN := build/rpg
 

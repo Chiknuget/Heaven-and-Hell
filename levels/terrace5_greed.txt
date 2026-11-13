@@ -2,6 +2,7 @@ name: The Fifth Terrace
 subtitle: Greed
 sky_top: 190 175 140
 sky_bottom: 110 98 70
+npc: 4 3 soul_greed sprite=soul unless=freed_greed
 map:
   ppppp
  pCpppCp

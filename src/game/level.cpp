@@ -350,6 +350,21 @@ namespace game
 					fail(path, lineNo, "expected a tile position like '4 4'");
 				hasSpawn = true;
 			}
+			else if (key == "enter_scene")
+			{
+				std::istringstream s(value);
+				if (!(s >> level.enterScene))
+					fail(path, lineNo, "expected 'enter_scene: name [once]'");
+
+				std::string option;
+				while (s >> option)
+				{
+					if (option == "once")
+						level.enterOnce = true;
+					else
+						fail(path, lineNo, "unknown enter_scene option '" + option + "'");
+				}
+			}
 			else if (key == "npc")
 			{
 				std::istringstream s(value);
@@ -364,10 +379,18 @@ namespace game
 						npc.firstVisitOnly = true;
 					else if (option == "greet")
 						npc.greet = true;
+					else if (option.rfind("sprite=", 0) == 0)
+						npc.sprite = option.substr(7);
+					else if (option.rfind("if=", 0) == 0)
+						npc.ifFlag = option.substr(3);
+					else if (option.rfind("unless=", 0) == 0)
+						npc.unlessFlag = option.substr(7);
 					else
 						fail(path, lineNo, "unknown npc option '" + option + "'");
 				}
 
+				if (npc.sprite.empty())
+					npc.sprite = npc.name;
 				npc.line = lineNo;
 				level.npcs.push_back(npc);
 			}

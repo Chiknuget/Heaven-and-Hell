@@ -1,0 +1,33 @@
+// The Sixth Terrace: a soul who only ever needed one more taste.
+
+if freed_gluttony goto thanks
+if met_gluttony goto again
+set met_gluttony 1
+say The Hungry One: The fruit on that tree. Can you smell it? If I could only have one more taste, I would be satisfied.
+
+label again
+say The Hungry One: Just one more. That's all I ever needed. Just one more.
+choice I'll reach it for you. = reach | Was one more ever enough? = right | Then go and take it. = take
+
+label reach
+say The Hungry One: Yes! And then one more after that, and then...
+end
+
+label take
+say The Hungry One: I can't reach it! I've never been able to reach it!
+end
+
+label right
+say The Hungry One: ...No. Never once.
+say The Hungry One: I was never hungry for the fruit. I was hungry for the wanting.
+say The Hungry One: I think I can leave it on the branch.
+set freed_gluttony 1
+add freed 1
+if freed < 7 goto done
+objective climb All seven souls are free. Climb to the summit.
+label done
+end
+
+label thanks
+say The Hungry One: I haven't thought about food since I got here. I didn't know that was possible.
+end

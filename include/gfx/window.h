@@ -20,6 +20,8 @@ namespace pix
     Space,
     Enter,
     Escape,
+    Backspace,
+    Tab,
     Count // not a real key: the number of keys above
   };
 
@@ -37,8 +39,12 @@ namespace pix
     void present(const Framebuffer &fb);
 
     bool isKeyDown(Key key) const;
+
     // True only on the frame the key went down, not while it's held
     bool wasKeyPressed(Key key) const;
+
+    // Printable characters typed since the last pollEvents, in order
+    const std::string &typedText() const;
 
   private:
     struct Impl;

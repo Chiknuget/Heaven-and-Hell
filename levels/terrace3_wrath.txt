@@ -2,6 +2,7 @@ name: The Third Terrace
 subtitle: Wrath
 sky_top: 140 130 130
 sky_bottom: 70 62 62
+npc: 4 3 soul_wrath sprite=soul unless=freed_wrath
 map:
   fffff
  fpfpfpf

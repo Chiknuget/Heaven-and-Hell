@@ -2,6 +2,7 @@ name: The Seventh Terrace
 subtitle: Lust
 sky_top: 240 200 160
 sky_bottom: 150 100 70
+npc: 4 3 soul_lust sprite=soul unless=freed_lust
 map:
   ppFpp
  pppFppp

@@ -2,6 +2,7 @@ name: The Fourth Terrace
 subtitle: Sloth
 sky_top: 170 165 160
 sky_bottom: 100 96 90
+npc: 4 3 soul_sloth sprite=soul unless=freed_sloth
 map:
   mmmmm
  mmpppmm

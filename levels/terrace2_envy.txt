@@ -2,6 +2,7 @@ name: The Second Terrace
 subtitle: Envy
 sky_top: 165 160 175
 sky_bottom: 95 90 105
+npc: 4 3 soul_envy sprite=soul unless=freed_envy
 map:
   aaaaa
  apppppa

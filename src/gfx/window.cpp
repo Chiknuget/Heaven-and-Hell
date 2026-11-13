@@ -45,6 +45,10 @@ namespace pix
 				return static_cast<int>(Key::Enter);
 			case XK_Escape:
 				return static_cast<int>(Key::Escape);
+			case XK_BackSpace:
+				return static_cast<int>(Key::Backspace);
+			case XK_Tab:
+				return static_cast<int>(Key::Tab);
 			default:
 				return -1;
 			}
@@ -64,6 +68,7 @@ namespace pix
 		int height = 0;
 		bool keys[static_cast<int>(Key::Count)] = {};
 		bool pressed[static_cast<int>(Key::Count)] = {};
+		std::string typed; // text typed since the last pollEvents
 
 		void createImage(int w, int h)
 		{
@@ -146,6 +151,7 @@ namespace pix
 	{
 		Impl &w = *m_impl;
 		std::fill(std::begin(w.pressed), std::end(w.pressed), false);
+		w.typed.clear();
 
 		while (XPending(w.display))
 		{
@@ -176,6 +182,20 @@ namespace pix
 					if (down && !w.keys[k])
 						w.pressed[k] = true;
 					w.keys[k] = down;
+				}
+
+				// The actual characters typed, for text boxes like name entry.
+				// Unlike the keys above, held keys repeat here, like in any text box.
+				if (e.type == KeyPress)
+				{
+					char buf[16];
+					KeySym sym;
+					int n = XLookupString(&e.xkey, buf, sizeof(buf), &sym, nullptr);
+					for (int i = 0; i < n; ++i)
+					{
+						if (buf[i] >= 32 && buf[i] < 127)
+							w.typed += buf[i];
+					}
 				}
 				break;
 			}
@@ -234,6 +254,11 @@ namespace pix
 	bool Window::wasKeyPressed(Key key) const
 	{
 		return m_impl->pressed[static_cast<int>(key)];
+	}
+
+	const std::string &Window::typedText() const
+	{
+		return m_impl->typed;
 	}
 
 } // namespace pix

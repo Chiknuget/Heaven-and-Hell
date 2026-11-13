@@ -1,0 +1,17 @@
+// The traveler's first death. Something unseen kills him on the Surface.
+// The player only learns what it was in the second mission.
+
+wait 40
+say {name}: The world. It looks just the way I left it.
+say {name}: Then why does it feel like something is watching me?
+
+explore 4 4
+
+fade 0 0 0 200 120
+say {name}: It's getting dark. Too fast.
+say {name}: Hello? Is someone there?
+wait 60
+say ???: ...
+fade 160 0 0 255 4
+wait 20
+die

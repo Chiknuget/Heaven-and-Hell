@@ -1,0 +1,34 @@
+// The Fifth Terrace: a soul who will climb as soon as he has enough.
+
+if freed_greed goto thanks
+if met_greed goto again
+set met_greed 1
+say The Counter: Nine hundred ninety-eight. Nine hundred ninety-nine. Don't touch them!
+say The Counter: When I reach a thousand, I'll have enough. Then I'll climb.
+
+label again
+say The Counter: I lost count again. One. Two. Three...
+choice I'll help you count. = help | Will a thousand be enough? = right | You can't carry it up there. = carry
+
+label help
+say The Counter: Help? You'll steal them! Get away!
+end
+
+label carry
+say The Counter: Then I won't go up there!
+end
+
+label right
+say The Counter: ...No. It never was. Not at a hundred, not at ten thousand.
+say The Counter: There was always one more coin between me and enough.
+say The Counter: I don't think I need to count anymore.
+set freed_greed 1
+add freed 1
+if freed < 7 goto done
+objective climb All seven souls are free. Climb to the summit.
+label done
+end
+
+label thanks
+say The Counter: My hands feel so light. I keep reaching for my pockets out of habit.
+end

@@ -41,7 +41,10 @@ namespace game
 	{
 		int x = 0;
 		int y = 0;
-		std::string name;						 // also the name of their sprite and dialogue files
+		std::string name;						 // their scene or dialogue file
+		std::string sprite;					 // their sprite file (defaults to name)
+		std::string ifFlag;					 // only present when this flag is set
+		std::string unlessFlag;			 // only present when this flag is not set
 		bool firstVisitOnly = false; // only there the first time you enter the level
 		bool greet = false;					 // starts talking as soon as you arrive
 		int line = 0;								 // line in the level file, for error messages
@@ -55,6 +58,8 @@ namespace game
 		pix::Color skyBottom = pix::rgb(0, 0, 0);
 		int spawnX = -1; // where you appear when you don't arrive by stairs
 		int spawnY = -1;
+		std::string enterScene; // scene to run on arrival, if any
+		bool enterOnce = false; // only on the first visit
 		std::vector<NpcSpawn> npcs;
 		std::vector<std::string> rows;
 

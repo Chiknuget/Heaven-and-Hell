@@ -1,0 +1,45 @@
+// The prologue: waking in Heaven, what the traveler saw, and the judgment.
+// 60 frames = 1 second.
+
+wait 40
+say {name}: Where... where am I?
+say {name}: The last thing I remember is the road. Then nothing.
+say {name}: This place is too quiet. Too bright.
+
+// Let the player walk until they reach the spot between the two back pillars
+explore 4 1
+
+// What he saw. The player never sees it.
+fade 255 255 255 255 6
+say {name}: What... is that?
+say {name}: No. No, I shouldn't have seen that.
+fade 255 255 255 0 60
+wait 30
+
+// The light grows until it fills the screen
+glow 400 180
+say The Voice: Be still, {name}.
+say The Voice: You were not called here. You walked in as no living soul ever has, and you have seen what was never meant for living eyes.
+say The Voice: What has been seen cannot be unseen. You cannot return to the world of the living carrying it.
+say {name}: Then what happens to me?
+say The Voice: By rights, you belong to the deep places. Hell would keep you, and keep your silence.
+say The Voice: But I will offer you another road.
+say The Voice: There is work below that the dead cannot do and My angels will not. Souls lost on the mountain. A village crying out. One who escaped his judgment. And something old, sleeping at the bottom of the world.
+say The Voice: Serve Me in these things, and you will be judged by what you do, not by what you saw.
+say The Voice: Choose, {name}.
+choice Serve = serve | Refuse = refuse
+
+label refuse
+say The Voice: So be it.
+fade 140 0 0 255 60
+fade 0 0 0 255 60
+caption And so {name} went down into the dark, and the dark kept his silence forever.
+menu
+
+label serve
+say The Voice: Then go down. The way will open before you.
+say The Voice: And {name}... remember that you are still alive. Down there, that will matter more than you know.
+glow 0 90
+settile 5 8 v
+banner
+end

@@ -2,6 +2,7 @@ name: The Sixth Terrace
 subtitle: Gluttony
 sky_top: 190 210 180
 sky_bottom: 110 130 100
+npc: 4 3 soul_gluttony sprite=soul unless=freed_gluttony
 map:
   pTppp
  ppppwwp

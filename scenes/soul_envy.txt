@@ -1,0 +1,34 @@
+// The Second Terrace: a woman who can't stop watching the souls above her.
+
+if freed_envy goto thanks
+if met_envy goto again
+set met_envy 1
+say The Watcher: Do you see them? Up there, on the terrace above. They climb so easily.
+say The Watcher: Why them? Why always them, and never me?
+
+label again
+say The Watcher: I can't take my eyes off them. If I look away, they'll get even further ahead.
+choice They had it easier than you. = easier | Then stop looking and climb. = stop | Someone below is watching you too. = right
+
+label easier
+say The Watcher: They did! They always did! You see it too!
+end
+
+label stop
+say The Watcher: You don't understand. You've never had to watch.
+end
+
+label right
+say The Watcher: ...Below me? Someone looks at me the way I look at them?
+say The Watcher: All this time I've been counting their steps instead of taking my own.
+say The Watcher: I don't want anyone to look at me like that. I'll climb.
+set freed_envy 1
+add freed 1
+if freed < 7 goto done
+objective climb All seven souls are free. Climb to the summit.
+label done
+end
+
+label thanks
+say The Watcher: I don't know who climbed faster. I stopped counting. It's so quiet without it.
+end
