@@ -1,0 +1,27 @@
+// Charon, ferryman of the dead
+size: 8 16
+origin: 4 15
+
+palette:
+c 50 46 56
+C 34 30 40
+e 255 90 40
+s 150 140 130
+
+anim: down
+..cccc..
+.cccccc.
+.cCCCCc.
+.ceCCec.
+.cCCCCc.
+..cccc..
+.cccccc.
+cccccccc
+sccccccs
+.cccccc.
+.cCccCc.
+.cccccc.
+.cCccCc.
+.cccccc.
+cccccccc
+.C.CC.C.

@@ -3,7 +3,7 @@ subtitle: You have died
 sky_top: 200 196 220
 sky_bottom: 120 112 140
 spawn: 4 4
-guide: 5 3
+npc: 5 3 guide first_visit greet
 map:
    pppp
   pppppp

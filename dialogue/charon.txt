@@ -1,0 +1,9 @@
+name: Charon
+[first]
+Another soul, wandering where the living do not belong.
+I am Charon. I ferry the dead across the Acheron, into the circles below.
+You are not dead. Not yet. Go on, then. The road down will see to that.
+[burdened]
+You carry a burden. I can smell it on you. Heaven will not have you like that.
+[again]
+Still walking? Most stop eventually.

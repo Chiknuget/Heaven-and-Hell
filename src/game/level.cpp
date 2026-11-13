@@ -350,11 +350,26 @@ namespace game
 					fail(path, lineNo, "expected a tile position like '4 4'");
 				hasSpawn = true;
 			}
-			else if (key == "guide")
+			else if (key == "npc")
 			{
 				std::istringstream s(value);
-				if (!(s >> level.guideX >> level.guideY))
-					fail(path, lineNo, "expected a tile position like '5 3'");
+				NpcSpawn npc;
+				if (!(s >> npc.x >> npc.y >> npc.name))
+					fail(path, lineNo, "expected 'npc: x y name'");
+
+				std::string option;
+				while (s >> option)
+				{
+					if (option == "first_visit")
+						npc.firstVisitOnly = true;
+					else if (option == "greet")
+						npc.greet = true;
+					else
+						fail(path, lineNo, "unknown npc option '" + option + "'");
+				}
+
+				npc.line = lineNo;
+				level.npcs.push_back(npc);
 			}
 			else if (key == "map")
 			{
@@ -396,6 +411,13 @@ namespace game
 			}
 			if (level.spawnX < 0)
 				throw std::runtime_error(path + ": level has no walkable tiles");
+		}
+
+		// Characters have to stand on solid ground
+		for (const NpcSpawn &npc : level.npcs)
+		{
+			if (!level.isWalkable(npc.x, npc.y))
+				fail(path, npc.line, "npc '" + npc.name + "' is not on a walkable tile");
 		}
 
 		return level;

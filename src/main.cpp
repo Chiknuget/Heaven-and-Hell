@@ -12,6 +12,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <exception>
+#include <map>
 #include <string>
 #include <thread>
 #include <vector>
@@ -23,7 +24,9 @@ constexpr int START_SCALE = 4;
 // Screen pixels moved per frame when walking sideways. Up/down moves half
 // this, which matches the 2:1 slope of the iso grid. Keep it a whole number.
 constexpr float SPEED_X = 1.0f;
-constexpr float PLAYER_RADIUS = 0.2f; // half the width of the collision box, in tiles
+constexpr float PLAYER_RADIUS = 0.2f; // half the width of the player's collision box, in tiles
+constexpr float NPC_RADIUS = 0.3f;		// half the width of an NPC's collision box
+constexpr float TALK_RANGE = 1.0f;		// how close you need to be to talk, in tiles
 
 constexpr int STAIRS_FADE = 20;		 // frames for each half of a stairs fade
 constexpr int DEATH_FADE = 45;		 // slower fade when you die
@@ -50,6 +53,14 @@ struct Player
 	Facing facing = Facing::Down;
 	bool walking = false;
 	int animTick = 0; // counts up while walking
+};
+
+// A character standing on the current level
+struct NpcState
+{
+	const game::NpcSpawn *spawn; // where they came from in the level file
+	float x, y;
+	Facing facing = Facing::Down;
 };
 
 // A place the player can be sent to
@@ -95,7 +106,8 @@ struct Banner
 struct DialogueState
 {
 	bool active = false;
-	game::Dialogue script;
+	std::string speaker;
+	std::vector<std::string> pages;
 	int page = 0;
 	int shown = 0; // letters revealed so far on this page
 	int tick = 0;	 // frame counter, for the blinking arrow
@@ -114,18 +126,18 @@ struct Actor
 struct Game
 {
 	game::World world;
-	game::Dialogue guideScript;
-	pix::Sprite travelerSprite;
-	pix::Sprite guideSprite;
+	std::map<std::string, pix::Sprite> sprites;			 // by name, from sprites/
+	std::map<std::string, game::Dialogue> dialogues; // by name, from dialogue/
 	Player player{0, 0.0f, 0.0f};
-	Destination checkpoint; // where Purgatory's gates send you back to
+	std::vector<NpcState> npcs;				// characters on the current level
+	std::map<int, int> visits;				// how many times each level has been entered
+	std::map<std::string, int> talks; // how many times each character has been spoken to
+	Destination checkpoint;						// where Purgatory's gates send you back to
 	Transition transition;
 	Banner banner;
 	DialogueState dialogue;
-	int burden = 0;						 // added by the toll gate, lifted at Purgatory's summit
-	bool metGuide = false;		 // the guide only ever appears on your first death
-	bool guidePresent = false; // the guide is waiting in Ante-Purgatory right now
-	bool inProgress = false;	 // true once a game has been started
+	int burden = 0;					 // added by the toll gate, lifted at Purgatory's summit
+	bool inProgress = false; // true once a game has been started
 };
 
 // ===================================================================
@@ -173,6 +185,19 @@ const char *facingName(Facing f)
 	default:
 		return "down";
 	}
+}
+
+// Which way someone at (fx, fy) faces to look at (tx, ty), as seen on screen
+Facing facingToward(float fx, float fy, float tx, float ty)
+{
+	float dx = tx - fx;
+	float dy = ty - fy;
+	float sx = (dx - dy) * pix::TILE_W / 2;
+	float sy = (dx + dy) * pix::TILE_H / 2;
+
+	if (std::fabs(sx) > std::fabs(sy))
+		return sx > 0 ? Facing::Right : Facing::Left;
+	return sy > 0 ? Facing::Down : Facing::Up;
 }
 
 // Chooses which frame of a sprite to show. Sets flip when a missing
@@ -242,25 +267,50 @@ bool boxBlocked(const game::Level &level, float x, float y)
 	return false;
 }
 
-// Moves one axis at a time. If an axis is blocked, the player is pushed
-// right up against the wall, which lets them slide along it on the other axis.
-void moveWithCollision(const game::Level &level, float &px, float &py, float dx, float dy)
+// Would the player at (x, y) overlap any character?
+bool npcBlocked(const std::vector<NpcState> &npcs, float x, float y)
 {
+	const float reach = PLAYER_RADIUS + NPC_RADIUS;
+	for (const NpcState &npc : npcs)
+	{
+		if (std::fabs(x - npc.x) < reach && std::fabs(y - npc.y) < reach)
+			return true;
+	}
+	return false;
+}
+
+// Moves one axis at a time. If an axis runs into a wall, the player is
+// pushed right up against it, which lets them slide along it. Characters
+// simply stop movement into them.
+void moveWithCollision(const game::Level &level, const std::vector<NpcState> &npcs,
+											 float &px, float &py, float dx, float dy)
+{
+	// If the player somehow starts overlapping someone, let them walk free
+	bool startedInside = npcBlocked(npcs, px, py);
+	auto hitsNpc = [&](float x, float y)
+	{ return !startedInside && npcBlocked(npcs, x, y); };
+
 	float nx = px + dx;
-	if (!boxBlocked(level, nx, py))
+	if (boxBlocked(level, nx, py))
+	{
+		if (dx > 0)
+			nx = std::floor(nx + PLAYER_RADIUS) - PLAYER_RADIUS - 0.001f;
+		else if (dx < 0)
+			nx = std::floor(nx - PLAYER_RADIUS) + 1.0f + PLAYER_RADIUS + 0.001f;
+	}
+	if (!hitsNpc(nx, py))
 		px = nx;
-	else if (dx > 0)
-		px = std::floor(nx + PLAYER_RADIUS) - PLAYER_RADIUS - 0.001f;
-	else if (dx < 0)
-		px = std::floor(nx - PLAYER_RADIUS) + 1.0f + PLAYER_RADIUS + 0.001f;
 
 	float ny = py + dy;
-	if (!boxBlocked(level, px, ny))
+	if (boxBlocked(level, px, ny))
+	{
+		if (dy > 0)
+			ny = std::floor(ny + PLAYER_RADIUS) - PLAYER_RADIUS - 0.001f;
+		else if (dy < 0)
+			ny = std::floor(ny - PLAYER_RADIUS) + 1.0f + PLAYER_RADIUS + 0.001f;
+	}
+	if (!hitsNpc(px, ny))
 		py = ny;
-	else if (dy > 0)
-		py = std::floor(ny + PLAYER_RADIUS) - PLAYER_RADIUS - 0.001f;
-	else if (dy < 0)
-		py = std::floor(ny - PLAYER_RADIUS) + 1.0f + PLAYER_RADIUS + 0.001f;
 }
 
 // ===================================================================
@@ -460,13 +510,14 @@ int pageLength(const std::string &page)
 	return n;
 }
 
-void startDialogue(DialogueState &d, const game::Dialogue &script)
+void startDialogue(DialogueState &d, const std::string &speaker, const std::vector<std::string> &pages)
 {
-	if (script.pages.empty())
+	if (pages.empty())
 		return;
 
 	d.active = true;
-	d.script = script;
+	d.speaker = speaker;
+	d.pages = pages;
 	d.page = 0;
 	d.shown = 0;
 	d.tick = 0;
@@ -477,7 +528,7 @@ void updateDialogue(const pix::Window &window, DialogueState &d)
 	using pix::Key;
 	++d.tick;
 
-	int length = pageLength(d.script.pages[d.page]);
+	int length = pageLength(d.pages[d.page]);
 	if (d.shown < length)
 		++d.shown; // typewriter: one letter per frame
 
@@ -494,7 +545,7 @@ void updateDialogue(const pix::Window &window, DialogueState &d)
 
 	++d.page;
 	d.shown = 0;
-	if (d.page >= static_cast<int>(d.script.pages.size()))
+	if (d.page >= static_cast<int>(d.pages.size()))
 		d.active = false;
 }
 
@@ -519,16 +570,16 @@ void drawDialogue(pix::Framebuffer &fb, const DialogueState &d)
 	fb.fillRect(boxX + 1, boxY + 1, boxW - 2, boxH - 2, background);
 
 	// Name tab on top of the box
-	if (!d.script.speaker.empty())
+	if (!d.speaker.empty())
 	{
-		int tabW = pix::textWidth(d.script.speaker) + 8;
+		int tabW = pix::textWidth(d.speaker) + 8;
 		fb.fillRect(boxX, boxY - 11, tabW, 12, border);
 		fb.fillRect(boxX + 1, boxY - 10, tabW - 2, 11, background); // joins the tab to the box
-		pix::drawText(fb, boxX + 4, boxY - 8, d.script.speaker, gold);
+		pix::drawText(fb, boxX + 4, boxY - 8, d.speaker, gold);
 	}
 
 	// Text, revealed letter by letter
-	const std::string &page = d.script.pages[d.page];
+	const std::string &page = d.pages[d.page];
 	std::vector<std::string> lines = game::wrapText(page, DIALOGUE_CHARS);
 	int remaining = d.shown;
 
@@ -547,6 +598,53 @@ void drawDialogue(pix::Framebuffer &fb, const DialogueState &d)
 }
 
 // ===================================================================
+// NPCs
+// ===================================================================
+
+// The closest character within talking range, or -1
+int npcInReach(const Game &g)
+{
+	int best = -1;
+	float bestDist = TALK_RANGE * TALK_RANGE;
+
+	for (int i = 0; i < static_cast<int>(g.npcs.size()); ++i)
+	{
+		float dx = g.npcs[i].x - g.player.x;
+		float dy = g.npcs[i].y - g.player.y;
+		float dist = dx * dx + dy * dy;
+		if (dist <= bestDist)
+		{
+			best = i;
+			bestDist = dist;
+		}
+	}
+	return best;
+}
+
+// Starts a conversation, choosing what the character says based on
+// whether you've met before and whether you carry Burden
+void talkTo(Game &g, NpcState &npc)
+{
+	const std::string &name = npc.spawn->name;
+	auto it = g.dialogues.find(name);
+	if (it == g.dialogues.end())
+		return;
+
+	int &timesTalked = g.talks[name];
+	const game::DialogueSection *section = it->second.choose(timesTalked == 0, g.burden > 0);
+	if (!section || section->pages.empty())
+		return;
+
+	++timesTalked;
+
+	// Face each other
+	npc.facing = facingToward(npc.x, npc.y, g.player.x, g.player.y);
+	g.player.facing = facingToward(g.player.x, g.player.y, npc.x, npc.y);
+
+	startDialogue(g.dialogue, it->second.speaker, section->pages);
+}
+
+// ===================================================================
 // The game
 // ===================================================================
 
@@ -559,34 +657,58 @@ void arrive(Game &g, const Destination &d)
 	g.player.x = d.x;
 	g.player.y = d.y;
 
+	int visit = ++g.visits[d.floor];
+
 	const game::Level &level = w.levels[d.floor];
 	showBanner(g.banner, level.name, level.subtitle);
 
 	if (!w.inPurgatory(d.floor))
-	{
-		g.checkpoint = d;				// arriving on a main floor saves your place
-		g.guidePresent = false; // the guide stays behind when you leave Purgatory
-	}
+		g.checkpoint = d; // arriving on a main floor saves your place
 
 	if (d.floor == w.purgatoryTop)
 		g.burden = 0; // the summit lifts every burden
 
-	if (d.floor == w.purgatoryBottom && !g.metGuide)
+	// Bring in this level's characters
+	g.npcs.clear();
+	for (const game::NpcSpawn &spawn : level.npcs)
 	{
-		g.metGuide = true;
-		g.guidePresent = true;
-		startDialogue(g.dialogue, g.guideScript);
+		if (spawn.firstVisitOnly && visit > 1)
+			continue;
+		g.npcs.push_back(NpcState{&spawn, spawn.x + 0.5f, spawn.y + 0.5f});
+	}
+
+	// Anyone who greets you starts talking right away
+	for (NpcState &npc : g.npcs)
+	{
+		if (npc.spawn->greet)
+		{
+			talkTo(g, npc);
+			break;
+		}
 	}
 }
 
 void startNewGame(Game &g)
 {
 	g = Game{};
+
 	// Everything is reloaded, so edits to levels, dialogue and sprites show up
 	g.world = game::loadWorld("levels/world.txt");
-	g.guideScript = game::loadDialogue("levels/guide.txt", DIALOGUE_CHARS, DIALOGUE_LINES);
-	g.travelerSprite = pix::loadSprite("sprites/traveler.txt");
-	g.guideSprite = pix::loadSprite("sprites/guide.txt");
+	g.sprites["traveler"] = pix::loadSprite("sprites/traveler.txt");
+
+	// Load every character used anywhere in the world, so a missing file
+	// is reported now rather than when you first meet them
+	for (const game::Level &level : g.world.levels)
+	{
+		for (const game::NpcSpawn &npc : level.npcs)
+		{
+			if (!g.sprites.count(npc.name))
+				g.sprites[npc.name] = pix::loadSprite("sprites/" + npc.name + ".txt");
+			if (!g.dialogues.count(npc.name))
+				g.dialogues[npc.name] = game::loadDialogue("dialogue/" + npc.name + ".txt", DIALOGUE_CHARS, DIALOGUE_LINES);
+		}
+	}
+
 	arrive(g, spawnOf(g.world, game::HEAVEN));
 	g.inProgress = true;
 }
@@ -661,7 +783,7 @@ void updateGame(const pix::Window &window, Game &g)
 
 	if (dx != 0.0f || dy != 0.0f)
 	{
-		moveWithCollision(level, pl.x, pl.y, dx, dy);
+		moveWithCollision(level, g.npcs, pl.x, pl.y, dx, dy);
 	}
 
 	// Nothing else happens until the current transition has finished
@@ -677,9 +799,19 @@ void updateGame(const pix::Window &window, Game &g)
 		return;
 	}
 
-	// Stairs and gates
+	if (!window.wasKeyPressed(Key::E))
+		return;
+
+	// E: talking takes priority over stairs and gates
+	int npc = npcInReach(g);
+	if (npc >= 0)
+	{
+		talkTo(g, g.npcs[npc]);
+		return;
+	}
+
 	ExitInfo ex = exitUnderPlayer(g);
-	if (ex.valid && ex.usable && window.wasKeyPressed(Key::E))
+	if (ex.valid && ex.usable)
 	{
 		g.burden += ex.burdenCost;
 		startTransition(g, ex.dest, STAIRS_FADE, pix::rgb(0, 0, 0));
@@ -763,15 +895,17 @@ void drawLevel(pix::Framebuffer &fb, const game::Level &level, const Player &p, 
 
 void drawGame(pix::Framebuffer &fb, const Game &g)
 {
-	const game::World &w = g.world;
-	const game::Level &level = w.levels[g.player.floor];
+	const game::Level &level = g.world.levels[g.player.floor];
 	const Player &p = g.player;
 
 	std::vector<Actor> actors;
-	actors.push_back({&g.travelerSprite, p.x, p.y, p.facing, p.walking, p.animTick});
-	if (g.guidePresent && p.floor == w.purgatoryBottom && level.guideX >= 0)
+	actors.push_back({&g.sprites.at("traveler"), p.x, p.y, p.facing, p.walking, p.animTick});
+
+	for (const NpcState &npc : g.npcs)
 	{
-		actors.push_back({&g.guideSprite, level.guideX + 0.5f, level.guideY + 0.5f, Facing::Down, false, 0});
+		auto it = g.sprites.find(npc.spawn->name);
+		const pix::Sprite *sprite = (it != g.sprites.end()) ? &it->second : nullptr;
+		actors.push_back({sprite, npc.x, npc.y, npc.facing, false, 0});
 	}
 
 	drawLevel(fb, level, p, actors);
@@ -780,13 +914,20 @@ void drawGame(pix::Framebuffer &fb, const Game &g)
 
 	if (calm && !g.dialogue.active)
 	{
-		ExitInfo ex = exitUnderPlayer(g);
-		if (ex.valid)
+		if (npcInReach(g) >= 0)
 		{
-			if (ex.usable)
-				drawPrompt(fb, ex.text);
-			else
-				drawNotice(fb, ex.text);
+			drawPrompt(fb, "talk");
+		}
+		else
+		{
+			ExitInfo ex = exitUnderPlayer(g);
+			if (ex.valid)
+			{
+				if (ex.usable)
+					drawPrompt(fb, ex.text);
+				else
+					drawNotice(fb, ex.text);
+			}
 		}
 	}
 

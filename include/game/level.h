@@ -36,6 +36,17 @@ namespace game
 
 	const TileType &tileType(char c);
 
+	// A character placed in a level file with "npc: x y name [options]"
+	struct NpcSpawn
+	{
+		int x = 0;
+		int y = 0;
+		std::string name;						 // also the name of their sprite and dialogue files
+		bool firstVisitOnly = false; // only there the first time you enter the level
+		bool greet = false;					 // starts talking as soon as you arrive
+		int line = 0;								 // line in the level file, for error messages
+	};
+
 	struct Level
 	{
 		std::string name;
@@ -44,8 +55,7 @@ namespace game
 		pix::Color skyBottom = pix::rgb(0, 0, 0);
 		int spawnX = -1; // where you appear when you don't arrive by stairs
 		int spawnY = -1;
-		int guideX = -1; // where the guide stands, if this level has one
-		int guideY = -1;
+		std::vector<NpcSpawn> npcs;
 		std::vector<std::string> rows;
 
 		int width() const;

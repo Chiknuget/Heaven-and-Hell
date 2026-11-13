@@ -20,7 +20,33 @@ namespace game
       return s.substr(start, end - start + 1);
     }
 
+    [[noreturn]] void fail(const std::string &path, int lineNo, const std::string &msg)
+    {
+      throw std::runtime_error(path + ":" + std::to_string(lineNo) + ": " + msg);
+    }
+
+    bool isKnownCondition(const std::string &c)
+    {
+      return c == "first" || c == "again" || c == "burdened" || c == "unburdened" || c == "default";
+    }
+
   } // namespace
+
+  const DialogueSection *Dialogue::choose(bool firstTime, bool burdened) const
+  {
+    for (const DialogueSection &s : sections)
+    {
+      const std::string &c = s.condition;
+      bool match = c.empty() || c == "default" ||
+                   (c == "first" && firstTime) ||
+                   (c == "again" && !firstTime) ||
+                   (c == "burdened" && burdened) ||
+                   (c == "unburdened" && !burdened);
+      if (match)
+        return &s;
+    }
+    return nullptr;
+  }
 
   std::vector<std::string> wrapText(const std::string &text, int maxChars)
   {
@@ -71,9 +97,11 @@ namespace game
 
     Dialogue d;
     std::string raw;
+    int lineNo = 0;
 
     while (std::getline(in, raw))
     {
+      ++lineNo;
       std::string line = trim(raw);
       if (line.empty() || line.rfind("//", 0) == 0)
         continue;
@@ -83,6 +111,22 @@ namespace game
         d.speaker = trim(line.substr(5));
         continue;
       }
+
+      // [condition] starts a new section
+      if (line.front() == '[')
+      {
+        if (line.back() != ']')
+          fail(path, lineNo, "section header is missing its ']'");
+        std::string condition = trim(line.substr(1, line.size() - 2));
+        if (!isKnownCondition(condition))
+          fail(path, lineNo, "unknown condition '" + condition + "'");
+        d.sections.push_back({condition, {}});
+        continue;
+      }
+
+      // Lines before any section header always apply
+      if (d.sections.empty())
+        d.sections.push_back({"", {}});
 
       // Group the wrapped lines into pages that fit the box
       std::vector<std::string> lines = wrapText(line, charsPerLine);
@@ -96,7 +140,7 @@ namespace game
             page += ' ';
           page += lines[j];
         }
-        d.pages.push_back(page);
+        d.sections.back().pages.push_back(page);
       }
     }
 

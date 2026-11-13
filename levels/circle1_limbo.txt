@@ -2,6 +2,7 @@ name: The First Circle
 subtitle: Limbo
 sky_top: 120 118 128
 sky_bottom: 40 38 46
+npc: 3 1 charon
 map:
 OOOOOOOO
 O^aaaaaa
