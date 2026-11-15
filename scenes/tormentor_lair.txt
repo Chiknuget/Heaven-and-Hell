@@ -1,0 +1,10 @@
+// Plays when the traveler steps into the Tormentor's lair.
+
+fade 0 0 0 140 60
+say {name}: It's getting dark. Too dark. Like the road.
+wait 40
+say ???: ...
+say {name}: There. Two red eyes.
+say {name}: Stone at my back. Step aside. Stone at my back.
+fade 0 0 0 70 30
+end

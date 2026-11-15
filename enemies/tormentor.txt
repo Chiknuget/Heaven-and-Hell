@@ -1,0 +1,10 @@
+// The Tormentor: comes out of the dark, charges like a bull
+name: The Tormentor
+sprite: tormentor
+health: 6
+speed: 1.0
+damage: 2
+sight: 5
+radius: 0.4
+behavior: charge
+charge_speed: 7

@@ -1,0 +1,28 @@
+// A villager in a plain brown tunic
+size: 8 14
+origin: 4 13
+
+palette:
+h 90 60 40
+s 230 190 150
+o 40 30 30
+t 120 90 60
+T 95 70 45
+p 70 60 50
+f 50 40 30
+
+anim: down
+..hhhh..
+.hhhhhh.
+.hssssh.
+.hossoh.
+..ssss..
+..tttt..
+.tttttt.
+.tttttt.
+sTttttTs
+.tttttt.
+.pppppp.
+.pp..pp.
+.pp..pp.
+.ff..ff.

@@ -1,0 +1,26 @@
+// Elder Maren
+size: 8 14
+origin: 4 13
+
+palette:
+w 230 230 235
+s 225 190 160
+o 40 30 30
+g 110 105 120
+G 85 80 95
+
+anim: down
+..wwww..
+.wwwwww.
+.wssssw.
+.wossow.
+..ssss..
+..gggg..
+.gggggg.
+.gggggg.
+sggggggs
+.gGggGg.
+.gggggg.
+.gggggg.
+.gggggg.
+..G..G..

@@ -1,0 +1,23 @@
+// Ilse the Hunter: the third clue. It charges, and walls stop it.
+
+if tormentor_dead goto after
+if climb_done goto mission
+say Ilse: Hunting's poor. Everything with any sense has gone to ground. You should too.
+end
+
+label mission
+if clue_hunt goto again
+set clue_hunt 1
+add clues 1
+say Ilse: I put three arrows in it. It didn't even slow down.
+say Ilse: But I'll tell you what I saw. It doesn't stalk you. It lowers its head and charges, straight as a thrown spear.
+say Ilse: It came for me once and hit the side of a house instead. Just stood there, swaying, like a bull that ran into a tree. If I'd had a blade instead of a bow...
+end
+
+label again
+say Ilse: Let it come at you. Make sure it's stone behind you, and not you in front of the stone.
+end
+
+label after
+say Ilse: I went into the woods yesterday. Alone. First time in a year. It felt like stealing something back.
+end

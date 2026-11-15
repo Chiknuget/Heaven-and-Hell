@@ -3,6 +3,7 @@
 #include "play/missions.h"
 #include "play/talk.h"
 #include "play/world.h"
+#include "play/combat.h"
 
 #include <filesystem>
 #include <fstream>
@@ -90,6 +91,7 @@ void saveGame(const Game &g)
     out << "player " << p.floor << ' ' << p.x << ' ' << p.y << ' ' << facingWord(p.facing) << '\n';
     out << "checkpoint " << g.checkpoint.floor << ' ' << g.checkpoint.x << ' ' << g.checkpoint.y << '\n';
     out << "burden " << g.burden << '\n';
+    out << "health " << g.player.health << '\n';
 
     for (const auto &[flag, value] : g.flags)
       out << "flag " << flag << ' ' << value << '\n';
@@ -188,6 +190,11 @@ void loadGame(Game &g)
       if (!(s >> loaded.burden))
         fail(lineNo, "expected 'burden number'");
     }
+    else if (key == "health")
+    {
+      if (!(s >> loaded.player.health))
+        fail(lineNo, "expected 'health number'");
+    }
     else if (key == "flag")
     {
       std::string flag;
@@ -250,6 +257,7 @@ void loadGame(Game &g)
   // Put the player back where they were, without replaying anything that
   // happens on arrival
   refreshNpcs(loaded);
+  spawnEnemies(loaded);
   const game::Level &level = loaded.world.levels[loaded.player.floor];
   showBanner(loaded.banner, level.name, level.subtitle);
   loaded.inProgress = true;

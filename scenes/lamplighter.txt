@@ -1,0 +1,23 @@
+// Tobias the Lamplighter: the first clue. It only comes in the dark.
+
+if tormentor_dead goto after
+if climb_done goto mission
+say Tobias: Lamps need oil, oil needs coin, and coin needs daylight. Off you go, stranger.
+end
+
+label mission
+if clue_lamp goto again
+set clue_lamp 1
+add clues 1
+say Tobias: Careful, that one's hot. I keep every lamp in this village lit. Every hour of every day.
+say Tobias: It only ever comes when it's dark. I've never once seen it step into the light. So I don't let it get dark.
+say Tobias: Some nights I think these lamps are the only reason any of us are still here.
+end
+
+label again
+say Tobias: Light, and more light. That's all I know.
+end
+
+label after
+say Tobias: I let the lamp by the road go out last night, just to see. Nothing came. I still didn't sleep.
+end

@@ -22,6 +22,10 @@ void drawPrompt(pix::Framebuffer &fb, const std::string &verb);
 void drawNotice(pix::Framebuffer &fb, const std::string &text);
 
 void drawBurden(pix::Framebuffer &fb, int burden);
+
+// The player's hearts in the top-left corner
+void drawHearts(pix::Framebuffer &fb, int health, int maxHealth);
+
 void drawBanner(pix::Framebuffer &fb, const Banner &b);
 void drawToast(pix::Framebuffer &fb, const Toast &t);
 void drawMissionLog(pix::Framebuffer &fb, const Game &g);

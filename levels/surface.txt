@@ -3,14 +3,18 @@ sky_top: 120 180 240
 sky_bottom: 200 230 250
 spawn: 4 4
 enter_scene: surface_attack once
+npc: 13 3 elder
+npc: 15 5 lamplighter sprite=villager
+npc: 12 7 gravedigger sprite=villager
+npc: 18 6 hunter sprite=villager
 map:
-T,,,,,,,T,
-,,,d,,,,,,
-,,,d,^,,T,
-,T,d,,,,,,
-,,,dddd,,,
-,,,,,,d,,,
-ww,,,,d,,T
-www,,,dv,,
-,ww,T,,,,,
-,,,,,,,,,,
+T,,,,,,,T,,,,,,,,,T,
+,,,d,,,,,,,HH,,,HH,,
+,,,d,^,,T,,HH,L,HH,,
+,T,d,,,,,,,oooooooo,
+,,,dddddddoo,,,,,,o,
+,,,,,,d,,,,o,HH,L,o,
+ww,,,,d,,T,o,HH,,,o,
+www,,,dv,,,ooooooooo
+,ww,T,,,,,,,,L,,HH,,
+,,,,,,,,,,,,,,,,HH,,

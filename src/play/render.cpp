@@ -1,5 +1,6 @@
 #include "play/render.h"
 
+#include "gfx/font.h"
 #include "gfx/iso.h"
 #include "gfx/sprite.h"
 #include "play/talk.h"
@@ -24,6 +25,23 @@ namespace
       return "right";
     default:
       return "down";
+    }
+  }
+
+  // The angle a facing points on screen (0 = right, increasing downward)
+  float facingAngle(Facing f)
+  {
+    const float pi = 3.14159265f;
+    switch (f)
+    {
+    case Facing::Right:
+      return 0.0f;
+    case Facing::Left:
+      return pi;
+    case Facing::Up:
+      return -pi / 2;
+    default:
+      return pi / 2;
     }
   }
 
@@ -66,13 +84,16 @@ namespace
   {
     fb.fillRect(fx - 4, fy - 1, 8, 2, pix::rgba(0, 0, 0, 90)); // soft shadow
 
-    if (!a.sprite)
+    if (!a.sprite || a.hidden)
       return;
 
     bool flip = false;
     const pix::Image *frame = pickFrame(*a.sprite, a.facing, a.walking, a.animTick, flip);
     if (frame)
       pix::drawSprite(fb, *a.sprite, *frame, fx, fy, flip);
+
+    if (a.alert)
+      pix::drawText(fb, fx - 2, fy - a.sprite->height - 10, "!", pix::rgb(255, 60, 50));
   }
 
 } // namespace
@@ -150,6 +171,26 @@ void drawLevel(pix::Framebuffer &fb, const game::Level &level, const Player &p, 
       }
     }
   }
+
+  // 3) The player's swing: a white arc that fades out
+  if (p.attackTimer > 0)
+  {
+    int groundH = game::tileType(level.at(static_cast<int>(p.x), static_cast<int>(p.y))).height;
+    float cx = camX + offX + pix::TILE_W / 2;
+    float cy = camY + offY - groundH - 6; // about chest height
+    float angle = facingAngle(p.facing);
+    int alpha = 255 * p.attackTimer / ATTACK_FRAMES;
+
+    for (float t = -1.0f; t <= 1.0f; t += 0.04f)
+    {
+      for (int r = 8; r <= 11; ++r)
+      {
+        int x = static_cast<int>(cx + std::cos(angle + t) * r);
+        int y = static_cast<int>(cy + std::sin(angle + t) * r * 0.6f); // flattened, like the ground
+        fb.setPixel(x, y, pix::rgba(255, 255, 255, alpha));
+      }
+    }
+  }
 }
 
 void drawGame(pix::Framebuffer &fb, const Game &g)
@@ -158,13 +199,28 @@ void drawGame(pix::Framebuffer &fb, const Game &g)
   const Player &p = g.player;
 
   std::vector<Actor> actors;
-  actors.push_back({&g.sprites.at("traveler"), p.x, p.y, p.facing, p.walking, p.animTick});
+
+  // The player flickers while they can't be hurt
+  Actor player{&g.sprites.at("traveler"), p.x, p.y, p.facing, p.walking, p.animTick};
+  player.hidden = p.hurtTimer > 0 && (p.hurtTimer / 4) % 2 == 1;
+  actors.push_back(player);
 
   for (const NpcState &npc : g.npcs)
   {
     auto it = g.sprites.find(npc.spawn->sprite);
     const pix::Sprite *sprite = (it != g.sprites.end()) ? &it->second : nullptr;
     actors.push_back({sprite, npc.x, npc.y, npc.facing, false, 0});
+  }
+
+  for (const Enemy &e : g.enemies)
+  {
+    auto it = g.sprites.find(e.type->sprite);
+    const pix::Sprite *sprite = (it != g.sprites.end()) ? &it->second : nullptr;
+
+    Actor actor{sprite, e.x, e.y, e.facing, e.walking, e.animTick};
+    actor.hidden = e.hurtTimer > 0 && (e.hurtTimer / 3) % 2 == 1;
+    actor.alert = (e.mode == EnemyMode::Windup);
+    actors.push_back(actor);
   }
 
   drawLevel(fb, level, p, actors);
@@ -189,6 +245,8 @@ void drawGame(pix::Framebuffer &fb, const Game &g)
       }
     }
   }
+
+  drawHearts(fb, p.health, PLAYER_MAX_HEALTH);
 
   if (g.burden > 0)
     drawBurden(fb, g.burden);

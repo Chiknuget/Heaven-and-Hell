@@ -50,6 +50,30 @@ namespace game
 		int line = 0;								 // line in the level file, for error messages
 	};
 
+	struct EnemySpawn {
+		int x = 0;
+		int y = 0;
+		std::string type;				// enemies/<type>.txt
+		std::string ifFlag;			// only present when this flag is set
+		std::string unlessFlag;	// only present when this flag is not set
+		std::string deathFlag;	// set to 1 when it's defeated
+		std::string deathScene;	// scene to run when it's defeated
+		int line = 0;						// line in the level file, for error messages
+	};
+
+
+	// An area that starts a scene when the player steps into it:
+	// "trigger: x y width height scene [if=flag] [unless=flag]"
+	struct Trigger {
+		int x = 0;
+		int y = 0;
+		int width = 1;
+		int height = 1;
+		std::string scene;
+		std::string ifFlag;			// only active when this flag is set
+		std::string unlessFlag;	// only active when this flag is not set
+	};
+
 	struct Level
 	{
 		std::string name;
@@ -61,6 +85,8 @@ namespace game
 		std::string enterScene; // scene to run on arrival, if any
 		bool enterOnce = false; // only on the first visit
 		std::vector<NpcSpawn> npcs;
+		std::vector<EnemySpawn> enemies;
+		std::vector<Trigger> triggers;
 		std::vector<std::string> rows;
 
 		int width() const;

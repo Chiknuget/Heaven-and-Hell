@@ -1,0 +1,19 @@
+// The Tormentor falls. The village mission ends and the Angel of Death begins.
+
+wait 20
+fade 0 0 0 170 40
+say {name}: It's coming apart.
+say ???: ...alive... you were... still... alive...
+say {name}: Like smoke. Like it was never really here at all.
+fade 0 0 0 0 60
+
+glow 220 90
+say The Voice: It is done, {name}. The village will sleep tonight.
+say The Voice: But one who escaped his judgment has climbed up out of the deep. He walks among the living now.
+say The Voice: Return to the village. Watch closely, and trust no one too quickly.
+glow 0 60
+
+complete village
+mission angel The Angel of Death
+objective angel Return to the village. Search for the one who escaped his judgment.
+end

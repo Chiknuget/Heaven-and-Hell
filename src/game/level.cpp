@@ -53,6 +53,21 @@ namespace game
 			static const TileType t{rgb(64, 120, 200), rgb(58, 110, 190), rgb(30, 60, 110), rgb(40, 80, 140), 2, false};
 			return t;
 		} // water
+		case 'o':
+		{
+			static const TileType t{rgb(150, 145, 135), rgb(140, 135, 125), rgb(90, 86, 80), rgb(115, 110, 102), 4, true};
+			return t;
+		} // cobblestone
+		case 'H':
+		{
+			static const TileType t{rgb(150, 60, 40), rgb(150, 60, 40), rgb(180, 150, 110), rgb(205, 175, 135), 18, false};
+			return t;
+		} // house (red roof, plaster walls)
+		case 'L':
+		{
+			static const TileType t{rgb(255, 220, 120), rgb(255, 220, 120), rgb(90, 70, 50), rgb(120, 95, 65), 10, false};
+			return t;
+		} // lantern post
 
 		// Caves
 		case ':':
@@ -394,6 +409,53 @@ namespace game
 				npc.line = lineNo;
 				level.npcs.push_back(npc);
 			}
+			else if (key == "enemy")
+			{
+				std::istringstream s(value);
+				EnemySpawn enemy;
+				if (!(s >> enemy.x >> enemy.y >> enemy.type))
+					fail(path, lineNo, "expected 'enemy: x y type'");
+
+				std::string option;
+				while (s >> option)
+				{
+					if (option.rfind("if=", 0) == 0)
+						enemy.ifFlag = option.substr(3);
+					else if (option.rfind("unless=", 0) == 0)
+						enemy.unlessFlag = option.substr(7);
+					else if (option.rfind("on_death=", 0) == 0)
+						enemy.deathFlag = option.substr(9);
+					else if (option.rfind("scene=", 0) == 0)
+						enemy.deathScene = option.substr(6);
+					else
+						fail(path, lineNo, "unknown enemy option '" + option + "'");
+				}
+
+				enemy.line = lineNo;
+				level.enemies.push_back(enemy);
+			}
+			else if (key == "trigger")
+			{
+				std::istringstream s(value);
+				Trigger trigger;
+				if (!(s >> trigger.x >> trigger.y >> trigger.width >> trigger.height >> trigger.scene))
+					fail(path, lineNo, "expected 'trigger: x y width height scene'");
+				if (trigger.width < 1 || trigger.height < 1)
+					fail(path, lineNo, "a trigger needs a width and height of at least 1");
+
+				std::string option;
+				while (s >> option)
+				{
+					if (option.rfind("if=", 0) == 0)
+						trigger.ifFlag = option.substr(3);
+					else if (option.rfind("unless=", 0) == 0)
+						trigger.unlessFlag = option.substr(7);
+					else
+						fail(path, lineNo, "unknown trigger option '" + option + "'");
+				}
+
+				level.triggers.push_back(trigger);
+			}
 			else if (key == "map")
 			{
 				inMap = true;
@@ -441,6 +503,13 @@ namespace game
 		{
 			if (!level.isWalkable(npc.x, npc.y))
 				fail(path, npc.line, "npc '" + npc.name + "' is not on a walkable tile");
+		}
+
+		// So do enemies
+		for (const EnemySpawn &enemy : level.enemies)
+		{
+			if (!level.isWalkable(enemy.x, enemy.y))
+				fail(path, enemy.line, "enemy '" + enemy.type + "' is not on a walkable tile");
 		}
 
 		return level;

@@ -100,6 +100,30 @@ void drawBurden(pix::Framebuffer &fb, int burden)
   pix::drawText(fb, x + 4, y + 4, text, pix::rgb(230, 170, 170));
 }
 
+void drawHearts(pix::Framebuffer &fb, int health, int maxHealth)
+{
+  static const char *HEART[] = {
+      ".##.##.",
+      "#######",
+      "#######",
+      ".#####.",
+      "..###..",
+      "...#...",
+  };
+
+  for (int i = 0; i < maxHealth; ++i)
+  {
+    pix::Color color = (i < health) ? pix::rgb(220, 40, 50) : pix::rgba(60, 20, 30, 200);
+    int x0 = 4 + i * 9;
+    int y0 = 4;
+
+    for (int r = 0; r < 6; ++r)
+      for (int c = 0; c < 7; ++c)
+        if (HEART[r][c] == '#')
+          fb.setPixel(x0 + c, y0 + r, color);
+  }
+}
+
 void drawBanner(pix::Framebuffer &fb, const Banner &b)
 {
   if (b.frame >= BANNER_FRAMES)
@@ -137,10 +161,12 @@ void drawToast(pix::Framebuffer &fb, const Toast &t)
   int a = fadeInOut(t.frame, TOAST_FRAMES, TOAST_FADE);
   int w = pix::textWidth(t.text) + 8;
   int h = pix::GLYPH_H + 7;
+  const int x = 4;
+  const int y = 14; // below the hearts
 
-  fb.fillRect(4, 4, w, h, pix::rgba(255, 210, 80, a * 200 / 255));
-  fb.fillRect(5, 5, w - 2, h - 2, pix::rgba(24, 20, 32, a * 230 / 255));
-  pix::drawText(fb, 8, 8, t.text, pix::rgba(255, 230, 180, a));
+  fb.fillRect(x, y, w, h, pix::rgba(255, 210, 80, a * 200 / 255));
+  fb.fillRect(x + 1, y + 1, w - 2, h - 2, pix::rgba(24, 20, 32, a * 230 / 255));
+  pix::drawText(fb, x + 4, y + 4, t.text, pix::rgba(255, 230, 180, a));
 }
 
 void drawMissionLog(pix::Framebuffer &fb, const Game &g)

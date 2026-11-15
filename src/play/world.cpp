@@ -7,6 +7,8 @@
 #include "play/save.h"
 #include "play/scenes.h"
 #include "play/talk.h"
+#include "play/combat.h"
+#include "play/text.h"
 
 #include <cmath>
 #include <cstdio>
@@ -140,6 +142,14 @@ void arrive(Game &g, const Destination &d)
   g.player.y = d.y;
   g.effects = Effects{};    // whatever a scene left on screen stays behind
   g.pendingAutosave = true; // saved once any arrival scene or conversation is over
+  g.firedTriggers.clear();  // triggers can fire again on every visit
+
+  // The dead wake whole, and nothing that was happening carries over
+  if (g.player.health <= 0)
+    g.player.health = PLAYER_MAX_HEALTH;
+  g.player.hurtTimer = 0;
+  g.player.knockTimer = 0;
+  g.player.attackTimer = 0;
 
   int visit = ++g.visits[d.floor];
 
@@ -153,6 +163,7 @@ void arrive(Game &g, const Destination &d)
     g.burden = 0; // the summit lifts every burden
 
   refreshNpcs(g);
+  spawnEnemies(g);
 
   // The level's own scene, if it has one...
   if (!level.enterScene.empty() && (!level.enterOnce || visit == 1))
@@ -193,6 +204,9 @@ void loadAssets(Game &g)
     if (!level.enterScene.empty())
       loadSceneOnce(level.enterScene);
 
+    for (const game::Trigger &trigger : level.triggers)
+      loadSceneOnce(trigger.scene);
+
     for (const game::NpcSpawn &npc : level.npcs)
     {
       if (!g.sprites.count(npc.sprite))
@@ -210,6 +224,20 @@ void loadAssets(Game &g)
                                    ".txt or dialogue/" + npc.name + ".txt");
         g.dialogues[npc.name] = game::loadDialogue("dialogue/" + npc.name + ".txt");
       }
+    }
+
+    for (const game::EnemySpawn &enemy : level.enemies)
+    {
+      if (!enemy.deathScene.empty())
+        loadSceneOnce(enemy.deathScene);
+
+      if (g.enemyTypes.count(enemy.type))
+        continue;
+
+      game::EnemyType type = game::loadEnemyType("enemies/" + enemy.type + ".txt");
+      if (!g.sprites.count(type.sprite))
+        g.sprites[type.sprite] = pix::loadSprite("sprites/" + type.sprite + ".txt");
+      g.enemyTypes[enemy.type] = type;
     }
   }
 }
@@ -332,6 +360,35 @@ void updateGame(const pix::Window &window, Game &g)
       std::fprintf(stderr, "Autosave failed: %s\n", e.what());
       showToast(g, "Could not save the game");
     }
+  }
+
+  // Stepping into a trigger area starts its scene, once per visit
+  {
+    int tx = static_cast<int>(std::floor(pl.x));
+    int ty = static_cast<int>(std::floor(pl.y));
+
+    for (const game::Trigger &tr : level.triggers)
+    {
+      bool inside = tx >= tr.x && tx < tr.x + tr.width && ty >= tr.y && ty < tr.y + tr.height;
+      if (!inside || g.firedTriggers.count(tr.scene))
+        continue;
+      if (!tr.ifFlag.empty() && flagValue(g, tr.ifFlag) == 0)
+        continue;
+      if (!tr.unlessFlag.empty() && flagValue(g, tr.unlessFlag) != 0)
+        continue;
+
+      g.firedTriggers.insert(tr.scene);
+      startScene(g, tr.scene);
+      return;
+    }
+  }
+
+  // Fighting: the player's swing, knockback and every enemy
+  updateCombat(window, g);
+  if (pl.health <= 0)
+  {
+    startTransition(g, deathDestination(g), DEATH_FADE, pix::rgb(255, 255, 255));
+    return;
   }
 
   // Death: the middle of the player is over something deadly

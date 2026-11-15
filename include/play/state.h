@@ -1,5 +1,6 @@
 #pragma once
 #include "game/dialogue.h"
+#include "game/enemy.h"
 #include "game/level.h"
 #include "game/scene.h"
 #include "gfx/framebuffer.h"
@@ -8,6 +9,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <set>
 
 // Everything the running game keeps track of, plus the numbers that tune it.
 
@@ -36,6 +38,17 @@ constexpr int DIALOGUE_LINES = 3;  // lines per page
 constexpr int WALK_FRAME_TICKS = 8; // frames each walking pose is shown for
 constexpr int MAX_NAME_LENGTH = 12; // longest name the player can choose
 
+// Combat
+constexpr int PLAYER_MAX_HEALTH = 5;  // hearts
+constexpr int HURT_FRAMES = 60;       // the player can't be hurt again for this long
+constexpr int ATTACK_FRAMES = 12;     // how long a swing is shown
+constexpr int ATTACK_COOLDOWN = 22;   // frames from one swing to the next
+constexpr float ATTACK_REACH = 0.6f;  // how far in front of the player a swing lands, in tiles
+constexpr float ATTACK_RADIUS = 0.5f; // how big the swing is
+constexpr float KNOCKBACK = 0.07f;    // tiles per frame while being knocked back
+constexpr int KNOCKBACK_FRAMES = 8;
+constexpr int ENEMY_HURT_FRAMES = 20; // an enemy can't be hit again for this long
+
 enum class Facing
 {
   Down,
@@ -51,6 +64,13 @@ struct Player
   Facing facing = Facing::Down;
   bool walking = false;
   int animTick = 0; // counts up while walking
+
+  int health = PLAYER_MAX_HEALTH;
+  int hurtTimer = 0;   // can't be hurt again while above 0
+  int attackTimer = 0; // above 0 while a swing is showing
+  int cooldown = 0;    // can't swing again while above 0
+  float knockX = 0.0f, knockY = 0.0f;
+  int knockTimer = 0;
 };
 
 // A character standing on the current level
@@ -59,6 +79,33 @@ struct NpcState
   const game::NpcSpawn *spawn; // where they came from in the level file
   float x, y;
   Facing facing = Facing::Down;
+};
+
+enum class EnemyMode
+{
+  Idle,   // hasn't noticed the player
+  Chase,  // walking at the player
+  Windup, // about to charge
+  Charge, // dashing in a straight line
+  Recover // after a charge: standing still, can't hurt anyone
+};
+
+// An enemy on the current level
+struct Enemy
+{
+  const game::EnemySpawn *spawn = nullptr;
+  const game::EnemyType *type = nullptr;
+  float x = 0.0f, y = 0.0f;
+  int health = 1;
+  Facing facing = Facing::Down;
+  EnemyMode mode = EnemyMode::Idle;
+  int timer = 0;                  // frames left in the current mode
+  float dirX = 0.0f, dirY = 0.0f; // direction of a charge
+  int hurtTimer = 0;
+  float knockX = 0.0f, knockY = 0.0f;
+  int knockTimer = 0;
+  bool walking = false;
+  int animTick = 0;
 };
 
 // A place the player can be sent to
@@ -171,6 +218,8 @@ struct Actor
   Facing facing;
   bool walking;
   int animTick;
+  bool hidden = false; // skipped this frame (flickering after a hit)
+  bool alert = false;  // a red "!" above its head
 };
 
 // A tile a scene changed, remembered so saves can put it back
@@ -185,13 +234,15 @@ struct Game
 {
   std::string playerName;
   game::World world;
-  std::map<std::string, pix::Sprite> sprites;      // by name, from sprites/
-  std::map<std::string, game::Dialogue> dialogues; // by name, from dialogue/
-  std::map<std::string, game::Scene> scenes;       // by name, from scenes/
-  std::map<std::string, int> flags;                // the story's memory; unset flags are 0
-  std::vector<Mission> missions;                   // in the order they were given
+  std::map<std::string, pix::Sprite> sprites;        // by name, from sprites/
+  std::map<std::string, game::Dialogue> dialogues;   // by name, from dialogue/
+  std::map<std::string, game::Scene> scenes;         // by name, from scenes/
+  std::map<std::string, game::EnemyType> enemyTypes; // by name, from enemies/
+  std::map<std::string, int> flags;                  // the story's memory; unset flags are 0
+  std::vector<Mission> missions;                     // in the order they were given
   Player player{0, 0.0f, 0.0f};
   std::vector<NpcState> npcs;       // characters on the current level
+  std::vector<Enemy> enemies;       // enemies on the current level
   std::map<int, int> visits;        // how many times each level has been entered
   std::map<std::string, int> talks; // how many times each character has been spoken to
   Destination checkpoint;           // where Purgatory's gates send you back to
@@ -201,10 +252,11 @@ struct Game
   DialogueState dialogue;
   SceneState scene;
   Effects effects;
-  int burden = 0;                       // added by the toll gate, lifted at Purgatory's summit
-  std::vector<TileChange> tileChanges;  // every tile scenes have changed
-  bool pendingAutosave = false;         // save once things settle after arriving
-  bool logOpen = false;                 // mission log on screen
-  bool inProgress = false;              // true once a game has been started
-  bool returnToMenu = false;            // set by a scene's "menu" command
+  int burden = 0;                      // added by the toll gate, lifted at Purgatory's summit
+  std::vector<TileChange> tileChanges; // every tile scenes have changed
+  std::set<std::string> firedTriggers; // trigger scenes already run during this visit
+  bool pendingAutosave = false;        // save once things settle after arriving
+  bool logOpen = false;                // mission log on screen
+  bool inProgress = false;             // true once a game has been started
+  bool returnToMenu = false;           // set by a scene's "menu" command
 };

@@ -1,0 +1,42 @@
+// Elder Maren: the heart of the village, and of the second mission.
+
+if tormentor_dead goto after
+if climb_done goto mission
+say Elder Maren: You shouldn't be out on the road, stranger. Not with the dark coming. Find yourself a roof.
+end
+
+label mission
+if hunt_ready goto ready
+if met_elder goto check
+set met_elder 1
+say Elder Maren: A traveler. We don't get many anymore. Not since the Tormentor came.
+say {name}: The Tormentor?
+say Elder Maren: That's what we call it. It comes out of the dark and takes whoever it finds. We keep the lamps burning day and night now, and still it comes.
+say {name}: Something killed me on the road, in the dark. I think it was the same thing.
+say Elder Maren: Killed you? ...And yet here you stand. I've heard stranger things this year.
+say Elder Maren: Talk to the others. Each of them has seen something of it. Then come back to me.
+objective village Learn what the Tormentor is from the villagers. Learned: {clues}/3
+if clues >= 3 goto enough
+end
+
+label check
+if clues >= 3 goto enough
+say Elder Maren: The lamplighter, the gravedigger, the hunter. Each of them has seen something. Then come back.
+end
+
+label enough
+say Elder Maren: So. It comes with the dark. It drags them to the hole by the road. And it runs at you like a bull.
+say Elder Maren: That hole leads down into the caves. That's where it takes them. That's where it sleeps.
+say {name}: Then that's where I'm going.
+say Elder Maren: Then take this much from an old woman. Let it charge. Put stone at your back, and step aside.
+set hunt_ready 1
+objective village Follow the Tormentor's trail down into the Caves.
+end
+
+label ready
+say Elder Maren: The caves, {name}. Stone at your back, and step aside.
+end
+
+label after
+say Elder Maren: The lamps went out last night for the first time in a year. Nobody screamed. Thank you, {name}.
+end

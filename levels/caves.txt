@@ -1,6 +1,11 @@
 name: The Caves
 sky_top: 30 26 24
 sky_bottom: 12 10 10
+enter_scene: caves_hunt
+enemy: 6 1 shade unless=hunt_ready
+enemy: 4 5 shade unless=hunt_ready
+enemy: 9 12 tormentor if=hunt_ready unless=tormentor_dead on_death=tormentor_dead scene=tormentor_dies
+trigger: 1 9 13 1 tormentor_lair if=hunt_ready unless=tormentor_dead
 map:
 ##########
 #::::#:::
@@ -11,3 +16,9 @@ map:
 #:##:##::
 #::#::#:v
 #::::::::
+#:::::::::::::
+#::#::::::#:::
+#:::::::::::::
+#::::::#::::::
+#:#:::::::::#:
+#:::::::::::::

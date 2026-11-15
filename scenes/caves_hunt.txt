@@ -1,0 +1,13 @@
+// The Caves. Once the hunt is on, the traveler notices the trail on arrival.
+
+if tormentor_dead goto done
+if hunt_ready goto hunt
+end
+
+label hunt
+wait 20
+say {name}: The marks lead down here. Something heavy, dragged across the stone.
+say {name}: They go south, deeper than the old tunnels. Even the shades are gone.
+
+label done
+end

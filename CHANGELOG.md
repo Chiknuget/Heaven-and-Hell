@@ -59,4 +59,4 @@ The first public tech demo: the engine and core systems.
 - A README with build instructions, controls and file formats.
 
 [0.2.0]: https://github.com/Chiknuget/Heaven-and-Hell/compare/v0.1.0...v0.2.0
-[0.1.0]: https://github.com/Chiknuget/Heaven-and-Hell/releases/tag/v0.1.0
+[0.1.0]: https://github.com/Chiknuget/Heaven-and-Hell/releases/tag/techdemo-v0.1.0

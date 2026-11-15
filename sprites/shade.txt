@@ -1,0 +1,21 @@
+// A shade: a scrap of living darkness
+size: 8 11
+origin: 4 10
+
+palette:
+k 20 16 28 210
+K 40 32 56 210
+e 255 60 60
+
+anim: down
+..kkkk..
+.kkkkkk.
+.kekkek.
+.kkkkkk.
+kkkkkkkk
+kKkkkkKk
+kkkkkkkk
+.kkkkkk.
+.kKkkKk.
+kk.kk.kk
+k..kk..k

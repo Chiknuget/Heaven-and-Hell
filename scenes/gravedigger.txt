@@ -1,0 +1,26 @@
+// Old Hesk the gravedigger: the second clue. It drags its victims to the Caves.
+
+if tormentor_dead goto after
+if climb_done goto mission
+say Old Hesk: Busy year for a gravedigger. Don't make it busier. Get indoors.
+end
+
+label mission
+if clue_grave goto again
+set clue_grave 1
+add clues 1
+say Old Hesk: It doesn't kill like a wolf. A wolf leaves something behind. This takes them whole.
+say Old Hesk: Drags them off to the hole by the road, the one that goes down into the earth. I've followed the marks to the edge. Never followed them in.
+say Old Hesk: ...Hold on. Let me look at you.
+say Old Hesk: Not long ago it went for someone on that road. Then it just stopped. Turned around and went back into the dark. Never seen it do that before.
+say {name}: ...
+say Old Hesk: Never mind. Old eyes, long year. Go on.
+end
+
+label again
+say Old Hesk: The hole by the road. Follow the marks, if you're braver than me.
+end
+
+label after
+say Old Hesk: First week in a year I haven't dug a single grave. I don't know what to do with my hands.
+end
