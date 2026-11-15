@@ -1,15 +1,40 @@
 # Changelog
-
+ 
 All notable changes to Heaven & Hell are documented in this file.
-
+ 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While the version starts with `0.`, the game is in early development and anything may change between releases.
-
-## [0.2.0] - TechDemo v0.2 - 2026-11-13
-
-The story begins. This release adds the prologue, the first mission, characters, a scripting language for scenes, and saving.
-
+ 
+## [0.3.0] - TechDemo v0.3 - 2026-11-15
+ 
+The fight begins. This release adds real-time combat, the village, and the second mission, ending with the hunt for the Tormentor.
+ 
 ### Added
-
+ 
+- **Combat.** The traveler has five hearts and swings with Space. Hits knock both sides back, and anyone who's hit flickers and can't be hurt again for a moment. Losing every heart sends the traveler to Purgatory, where he wakes with full health.
+- **Enemies.** Enemy types defined in text files in a new `enemies` folder, with health, speed, damage, sight range, body size and behavior. Two behaviors: **chase**, which walks at the player, and **charge**, which warns with a red "!", dashes in a straight line, and is left dazed and harmless after slamming into a wall.
+- **Shades**, drifting scraps of darkness in the Caves.
+- **The Tormentor**, a tall, pitch-black figure with red eyes, fought in its lair beneath the Caves.
+- **Mission 2, The Village.** A village on the Surface living in fear of the Tormentor. Elder Maren asks the traveler to learn what it is from Tobias the Lamplighter, Old Hesk the gravedigger and Ilse the Hunter, each of whom has seen one thing that matters in the fight. Their clues lead into the Caves.
+- **The start of Mission 3, The Angel of Death**, given by the Voice once the Tormentor falls.
+- **Trigger areas.** Parts of a level that start a scene when the player steps into them, once per visit, with `trigger: x y width height scene`.
+- **Level options for enemies:** `enemy: x y type`, with `if=`, `unless=`, `on_death=` to set a flag when it's defeated, and `scene=` to play a scene at that moment.
+- Villager and elder sprites, and new tiles: cobblestone (`o`), houses (`H`) and lantern posts (`L`).
+- Hearts in the top-left corner and a white arc for each swing.
+- Health is kept in saves. Saves from v0.2 still load, with full health.
+### Changed
+ 
+- The Surface is larger, with the village to the east. The original area and both staircases are where they were.
+- The Caves gain a large chamber below the old tunnels: the Tormentor's lair. The shades leave once the hunt is on.
+- Villagers say different things before The Climb is finished, during the investigation, and after the Tormentor is gone.
+- Collision works for bodies of any size, so enemies use the same movement rules as the player.
+- Mission notices appear just below the hearts.
+- Errors in enemy files quote the value that was read, and `behavior` accepts any capitalization.
+## [0.2.0] - TechDemo v0.2 - 2026-11-13
+ 
+The story begins. This release adds the prologue, the first mission, characters, a scripting language for scenes, and saving.
+ 
+### Added
+ 
 - **Prologue.** The traveler wakes in Heaven, sees what he shouldn't, and is judged by a voice from a blinding light. Choosing to serve begins the game; refusing leads to a short ending.
 - **Name entry.** The player names the traveler before the game starts, and the name appears throughout the dialogue.
 - **Mission 1, The Climb.** A scripted first death on the Surface, the guide's briefing in Ante-Purgatory, seven souls on the terraces to free through conversation, and a finale at the Earthly Paradise that leads into the next mission.
@@ -26,27 +51,24 @@ The story begins. This release adds the prologue, the first mission, characters,
 - Typed text, Backspace and Tab support in the window library.
 - A clear error message when a character has neither a scene nor a dialogue file.
 - This changelog.
-
 ### Changed
-
+ 
 - The game's code is split out of `main.cpp` into a `play` module (state, world, scenes, talk, missions, movement, text, save, render and ui), separate from the `game` module that loads data files.
 - The guide is now a character with a scene, and gives the first mission.
 - The stairs down from Heaven now appear only after the traveler agrees to serve.
 - Dialogue speeches are split into pages when shown, so long player names never overflow the box.
 - The main menu gains Save Game and Load Game, and shows short messages.
 - The README covers the new controls, file formats, scene commands and project layout.
-
 ### Removed
-
+ 
 - The `guide:` level key, replaced by `npc:` with the `first_visit` and `greet` options.
 - `levels/guide.txt`, replaced by `scenes/guide.txt`.
-
 ## [0.1.0] - TechDemo v0.1 - 2026-11-11
-
+ 
 The first public tech demo: the engine and core systems.
-
+ 
 ### Added
-
+ 
 - The `pix` graphics library, built directly on Xlib: a 320×180 framebuffer with pixel-perfect scaling, alpha blending, isometric tile rendering, depth sorting and a hand-made bitmap font.
 - Free eight-directional movement with collision, wall sliding and a jitter-free camera.
 - A stacked world of floors connected by stairs: Heaven, the Surface, the Caves, the Deep Caves and the nine circles of hell.
@@ -57,6 +79,7 @@ The first public tech demo: the engine and core systems.
 - A main menu with New Game, Continue and Quit.
 - Levels and dialogue loaded from plain text files.
 - A README with build instructions, controls and file formats.
-
+[0.3.0]: https://github.com/Chiknuget/Heaven-and-Hell/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/Chiknuget/Heaven-and-Hell/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/Chiknuget/Heaven-and-Hell/releases/tag/techdemo-v0.1.0
+ 
